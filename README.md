@@ -1,0 +1,1 @@
+# GetHistoryLinksForWechat.Tampermonkey.user.js
