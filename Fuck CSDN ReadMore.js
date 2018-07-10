@@ -7,7 +7,7 @@
 // @match        http://blog.csdn.net/*/article/details/*
 // @match        https://blog.csdn.net/*/article/details/*
 // @grant        none
-// @icon         https://www.baidu.com/s?ie=utf8&oe=utf8&wd=csdn&tn=98010089_dg&ch=2
+// @icon         https://csdnimg.cn/public/favicon.ico
 // ==/UserScript==
 
 (function() {
