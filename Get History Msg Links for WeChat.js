@@ -15,7 +15,10 @@
 // @icon         https://res.wx.qq.com/zh_CN/htmledition/v2/images/favicon31e225.ico
 // ==/UserScript==
 
-GM_addStyle('span.weui_media_hd{width:100px !important;float:left !important;} #down_url_links{white-space:nowrap!important;background-color: orange!important;}');
+GM_addStyle('span.weui_media_hd{width:100px !important;float:left !important;} '+
+            '#down_url_links{white-space:nowrap!important;background-color: orange!important;} '+
+            '#img-content{position: fixed !important;z-index: 9999970 !important;top: 20px !important;left: 2% !important;height: 100% !important;width: 96% !important;overflow: scroll !important;}'+
+            '#js_pc_qr_code{visibility: hidden;}');
 (function ($) {
     'use strict';
     $(function () {
@@ -41,6 +44,3 @@ GM_addStyle('span.weui_media_hd{width:100px !important;float:left !important;} #
         //$('#down_url').append('</table>');
     });
 })(window.jQuery.noConflict(true));
-
-
-
