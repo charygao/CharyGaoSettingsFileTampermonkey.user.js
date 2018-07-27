@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         获取微信公众号历史消息链接
-// @version      0.1
+// @version      0.2
 // @description  Get History Msg Links for WeChat
 // @namespace    http://www.cnblogs.com/Chary/
 // @author       CharyGao
@@ -17,11 +17,12 @@
 
 GM_addStyle('span.weui_media_hd{width:100px!important;float:left!important;} ' +
     '#down_url_links{white-space:nowrap!important;background-color:orange!important;} ' +
-    '#img-content{position:fixed!important;z-index:100!important;top:20px!important;left:2%!important;height:100%!important;width:96%!important;overflow:scroll!important;}' +
+    //'#img-content{position:fixed!important;z-index:100!important;top:20px!important;left:2%!important;height:95%!important;width:96%!important;overflow:scroll!important;}' +
+    '.img_loading{margin-left: auto;margin-right: auto;display: block;} .rich_media_area_primary_inner{max-width: 90%!important;}'+
     '#js_pc_qr_code{visibility:hidden!important;}' +
     '#page-content{background-color:rgba(0,0,0,0)!important;}' +
-    '#js_profile_qrcode_img{height:100px!important;width:100px!important;}' +
-    'img{width:100%!important;height:auto!important;}');//直接下载所有图片
+    '#js_profile_qrcode_img{height:100px!important;width:100px!important;}'// +'img{width:auto!important;height:auto!important;display: block!important;margin-left: auto!important;margin-right: auto!important;}'
+);//直接下载所有图片
 (function ($) {
     'use strict';
     $(function () {
@@ -31,7 +32,7 @@ GM_addStyle('span.weui_media_hd{width:100px!important;float:left!important;} ' +
                 $(this).attr('src', dataSrc);
                 $(this).attr('_src', dataSrc);
                 $(this).removeAttr('data-src');
-
+                $(this).removeAttr('style');
             }
         });
         if ($('#down_url')) {
