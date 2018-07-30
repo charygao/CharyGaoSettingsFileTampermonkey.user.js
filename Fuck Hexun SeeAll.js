@@ -9,7 +9,7 @@
 // @icon         http://www.hexun.com/favicon.ico
 
 // ==/UserScript==
-GM_addStyle('.art_contextBox{height:auto!important;} ' 
+GM_addStyle('.art_contextBox{height:auto!important;} .fttBox{display: none!important;}' 
 );//直接下载所有图片
 (function() {
     'use strict';
