@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         获取微信公众号历史消息链接
-// @version      0.2
+// @version      0.3
 // @description  Get History Msg Links for WeChat
 // @namespace    http://www.cnblogs.com/Chary/
 // @author       CharyGao
@@ -46,9 +46,9 @@ GM_addStyle('span.weui_media_hd{width:100px!important;float:left!important;} ' +
 
         $('h4.weui_media_title').each(function (i) {
             var link_href = $(this).attr('hrefs');
-
-            if (link_href) {
-                var down_link = '<div id="down_url_links">' + i + ' , ' + link_href + ' , ' + $(this).text() + '</div>';
+            var link_times = $(this).siblings('p.weui_media_extra_info')//.nextElementSibling.innerText
+            if (link_href && link_times) {
+                var down_link = '<div id="down_url_links">' + i + ' , ' + link_href + ' , ' + $(this).text() + ' , ' + link_times[0].innerText + '</div>';
                 $('#down_url').append(down_link);
             }
         }
