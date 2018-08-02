@@ -4,7 +4,7 @@
 // @version      0.4
 // @description  把看全文的那个啥玩意儿给干掉
 // @author       CharyGao
-// @match        http://money.hexun.com/*
+// @match        *hexun.com/*
 // @grant        GM_addStyle
 // @icon         http://www.hexun.com/favicon.ico
 
