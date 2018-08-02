@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         和讯理财看全文你大爷
 // @namespace    http://www.cnblogs.com/Chary/
-// @version      0.4
+// @version      0.5
 // @description  把看全文的那个啥玩意儿给干掉
 // @author       CharyGao
 // @match        *hexun.com/*
