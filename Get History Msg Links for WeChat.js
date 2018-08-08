@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         获取微信公众号历史消息链接
-// @version      0.3
+// @version      0.4
 // @description  Get History Msg Links for WeChat
 // @namespace    http://www.cnblogs.com/Chary/
 // @author       CharyGao
@@ -10,7 +10,7 @@
 // @match        http://mp.weixin.qq.com/s/*
 // @match        file:///*
 // @grant        GM_addStyle
-// @run-at       document-start
+// @run-at       document-end
 // @require     https://cdn.bootcss.com/jquery/3.3.1/jquery.js
 // @icon         https://res.wx.qq.com/zh_CN/htmledition/v2/images/favicon31e225.ico
 // ==/UserScript==
