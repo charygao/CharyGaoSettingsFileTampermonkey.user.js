@@ -308,7 +308,7 @@
             async: true,
             data: params,
             success: function (response) {
-                mylog(lesson.section_id + lesson.section_name + ' ppt mark as learned!->' + response);
+                //mylog(lesson.section_id + lesson.section_name + ' ppt mark as learned!->' + response);
             }
         });
     }
@@ -334,7 +334,7 @@
             async: true,
             data: params,
             success: function (response) {
-                mylog(lesson.section_id + lesson.section_name + 'htm mark as learned!->' + response);
+                //mylog(lesson.section_id + lesson.section_name + 'htm mark as learned!->' + response);
             }
         });
     }
@@ -361,7 +361,7 @@
             async: true,
             data: params,
             success: function (response) {
-                mylog(lesson.section_id + lesson.section_name + 'vedio mark as learned!->' + response);
+                //mylog(lesson.section_id + lesson.section_name + 'vedio mark as learned!->' + response);
             }
         });
     }
@@ -404,8 +404,9 @@
         var anchor = document.createElement("a");
         anchor.href = downloadUrl;
         anchor.download = file_download_path + file_extension;
-        // anchor.click();
-        // window.URL.revokeObjectURL(data); ///&&&&&&&&&&&&&&&&&&&&&&&&&&
+        //mylog(file_download_path);
+        anchor.click();
+        window.URL.revokeObjectURL(data);
     }
 
     function obj2str(o) //obj -> json string
@@ -547,9 +548,8 @@
     // 将下载链接发送到 Aria2 下载
     function sendDownloadTaskToAria2(download_url, file_name, save_path) {
 
-        ///&&&&&&&&&&&&&&&&&&&&&&&&&&
-        mylog(download_url + '\n\t' + save_path + '-' + file_name + '\n');
-        return;
+        //mylog(download_url + '\n\t' + save_path + '-' + file_name + '\n');
+        //return;
         var json_rpc = {
             id: '',
             jsonrpc: '2.0',
