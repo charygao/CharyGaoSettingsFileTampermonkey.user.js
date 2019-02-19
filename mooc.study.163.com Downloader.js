@@ -3,7 +3,7 @@
 // @name              网易云课堂mooc.study.163.com下载助手（需配合Aria2使用）
 // @name:en           mooc.study.163.com Downloader
 // @namespace         https://www.cnblogs.com/Chary/
-// @version           0.5
+// @version           0.6
 // @description       在mooc.study.163.com的课程学习页面添加批量下载按钮，方便将视频下载到本地学习
 // @description:en    add download button on mooc.study.163.com to download videos
 // @author            charyGao
@@ -281,6 +281,13 @@
                   if (isMarkAsLearned) {
                      mark_htm_as_learned(lesson);
                   }
+               } else if (lesson.content_type == '6') {//6 讨论 htm
+                  if (isSaveHtm) {
+                     get_discuss_htm_content(lesson.content_type, course_info.course_id, lesson.content_id, lesson.section_id, file_name, save_path);//lesson.json_content,
+                  }
+                  if (isMarkAsLearned) {
+                     mark_htm_as_learned(lesson);
+                  }
                }
             });
          });
@@ -364,6 +371,40 @@
          }
       });
    }
+   //获取文档下载地址
+   function get_discuss_htm_content(content_type, course_id, content_id, section_id, file_name, save_path) {//json_content,
+      var timestamp = new Date().getTime();
+      var params = {
+         "callCount": "1",
+         "scriptSessionId": "${scriptSessionId}190",
+         "httpSessionId": sessionId,
+         "c0-scriptName": "CourseBean",
+         "c0-methodName": "getLessonUnitLearnVo",
+         "c0-id": "0",
+         "c0-param0": "number:" + course_id,
+         "c0-param1": "number:" + content_id,
+         "c0-param2": "number:" + content_type,
+         "c0-param3": "number:0",
+         "c0-param4": "number:" + section_id,
+         "batchId": timestamp
+      };
+      $.ajax({
+         url: 'https://mooc.study.163.com/dwr/call/plaincall/CourseBean.getLessonUnitLearnVo.dwr?' + timestamp,
+         method: 'POST',
+         async: true,
+         data: params,
+         success: function (response) {
+            var htmContent = response.match(/s0\.content="(.*?)";s0/);
+            if (htmContent != null && htmContent.length > 0) {
+               var content = htmContent[1];
+               //mylog(unescape(content.replace(/\\u/gi, '%u')));//.replace(/\/|:|\?|\*|"|<|>|\|/g, " ")
+               if (isSaveHtm) {
+                  exportRaw(save_path.replace(course_save_path, '').replace(/\/|:|\?|\*|"|<|>|\|/g, "") + file_name, unescape(content.replace(/\\"/g, '"').replace(/\\u/gi, '%u')), '.htm');
+               }
+            }
+         }
+      });
+   }
 
    //获取文档下载地址
    function getHtmlContent(content_type, course_id, content_id, section_id, file_name, save_path) {//json_content,
@@ -388,10 +429,13 @@
          async: true,
          data: params,
          success: function (response) {
-            var htmlContent = response.match(/htmlContent:"(.*?)",/)[1];
-            //mylog(unescape(htmlContent.replace(/\\u/gi, '%u')));//.replace(/\/|:|\?|\*|"|<|>|\|/g, " ")
-            if (isSaveHtm) {
-               exportRaw(save_path.replace(course_save_path, '').replace(/\/|:|\?|\*|"|<|>|\|/g, "") + file_name, unescape(htmlContent.replace(/\\"/g, '"').replace(/\\u/gi, '%u')), '.htm');
+            var htmlContent = response.match(/htmlContent:"(.*?)",/);
+            if (htmlContent != null && htmlContent.length > 0) {
+               var htmlContentStr = htmlContent[1];
+               //mylog(unescape(htmlContentStr.replace(/\\u/gi, '%u')));//.replace(/\/|:|\?|\*|"|<|>|\|/g, " ")
+               if (isSaveHtm) {
+                  exportRaw(save_path.replace(course_save_path, '').replace(/\/|:|\?|\*|"|<|>|\|/g, "") + file_name, unescape(htmlContentStr.replace(/\\"/g, '"').replace(/\\u/gi, '%u')), '.htm');
+               }
             }
          }
       });
