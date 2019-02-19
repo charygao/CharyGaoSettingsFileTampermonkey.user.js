@@ -3,7 +3,7 @@
 // @name              网易云课堂mooc.study.163.com下载助手（需配合Aria2使用）
 // @name:en           mooc.study.163.com Downloader
 // @namespace         https://www.cnblogs.com/Chary/
-// @version           0.4
+// @version           0.5
 // @description       在mooc.study.163.com的课程学习页面添加批量下载按钮，方便将视频下载到本地学习
 // @description:en    add download button on mooc.study.163.com to download videos
 // @author            charyGao
@@ -108,7 +108,7 @@
                      var lesson_info = response.match(lesson_info_reg);
                      var jsonContent = null;
                      var json_Content_info = lesson_info[5].match(/\{\\"nosKey\\":\\"(.*?)\\",\\"fileName\\":\\"(.*?)\\"\}/);
-                     if (json_Content_info.length >= 2) {
+                     if (json_Content_info != null && json_Content_info.length >= 2) {
                         jsonContent = { 'nosKey': json_Content_info[1], 'fileName': json_Content_info[2] };
                      }
                      var lesson = {
