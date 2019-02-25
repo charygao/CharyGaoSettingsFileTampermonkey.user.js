@@ -1,4 +1,4 @@
-# 网易云课堂mooc.study.163.com下载助手（需配合Aria2使用）
+# 网易云课堂mooc.study.163.com Adown下载助手
 
 ## 功能
 
@@ -6,7 +6,7 @@
 
 ## 参考脚本
 
->参考 [中国大学 MOOC 下载助手（需配合Aria2使用](https://greasyfork.org/zh-CN/scripts/372684-中国大学-mooc-下载助手-需配合aria2使用)
+>参考 [中国大学 MOOC 下载助手](https://greasyfork.org/zh-CN/scripts/372684-中国大学-mooc-下载助手-需配合aria2使用)
 改写而成。
 
 ## 注意
@@ -35,4 +35,4 @@
 
 ![支付宝二维码](https://images2015.cnblogs.com/blog/572188/201601/572188-20160129220431380-467880664.jpg "打开支付宝扫一扫")
 ![微信支付二维码](https://images2015.cnblogs.com/blog/572188/201601/572188-20160104184906918-1590776095.jpg "微信搜索 'NotSet_Gao'")
-<!-- ![微信二维码](https://img2018.cnblogs.com/blog/572188/201902/572188-20190218214633762-165604052.jpg "微信") -->
+![微信二维码](https://img2018.cnblogs.com/blog/572188/201902/572188-20190218214633762-165604052.jpg "微信") 
