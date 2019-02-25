@@ -2,7 +2,7 @@
 // @name              网易云课堂mooc.study.163.com ADown下载助手
 // @name:en           mooc.study.163.com Downloader
 // @namespace         https://www.cnblogs.com/Chary/
-// @version           0.8
+// @version           1.0
 // @description       在mooc.study.163.com的课程学习页面添加批量下载按钮，方便将视频下载到本地学习
 // @description:en    add download button on mooc.study.163.com to download videos
 // @author            charyGao
@@ -613,9 +613,9 @@
          },
          onload: function (response) {
             mylog(response);
-            alert("done! open AriaNg to look!");
             if (!hasOpenAriac2Tab) {
                //GM_openInTab('http://aria2c.com/', { active: true });
+               alert("done! open AriaNg to look!");
                hasOpenAriac2Tab = true;
             }
          }

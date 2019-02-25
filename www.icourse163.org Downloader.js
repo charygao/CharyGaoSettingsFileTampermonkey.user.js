@@ -2,7 +2,7 @@
 // @name              中国大学 MOOC www.icourse163.org ADown下载助手
 // @name:en           www.icourse163.org Downloader
 // @namespace         https://www.cnblogs.com/Chary/
-// @version           0.3
+// @version           1.0
 // @description       在www.icourse163.org中国大学 MOOC 的课程学习页面添加批量下载按钮，方便将视频下载到本地学习
 // @description:en    add download button on www.icourse163.org to download videos
 // @author            charyGao
@@ -556,10 +556,9 @@
                     //mylog(video_download_url);
                     if (isSaveSrt && response.result.srtCaptions != null) {
                         response.result.srtCaptions.forEach(function (srtCaption) {
-                            sendDownloadTaskToAria2(srtCaption.url, file_name + "." + srtCaption.languageCode + '.srt', save_path);
+                            sendDownloadTaskToAria2(srtCaption.url, file_name + qualityString + '.' + srtCaption.languageCode + '.srt', save_path);
                         });
                     }
-
                     sendDownloadTaskToAria2(video_download_url, file_name + qualityString + '.' + video_format, save_path);
                 }
             }
@@ -591,9 +590,9 @@
             },
             onload: function (response) {
                 mylog(response);
-                alert("done! open AriaNg to look!");
                 if (!hasOpenAriac2Tab) {
                     //GM_openInTab('http://aria2c.com/', { active: true });
+                    alert("done! open AriaNg to look!");
                     hasOpenAriac2Tab = true;
                 }
             }
