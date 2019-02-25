@@ -2,7 +2,7 @@
 // @name              中国大学 MOOC www.icourse163.org ADown下载助手
 // @name:en           www.icourse163.org Downloader
 // @namespace         https://www.cnblogs.com/Chary/
-// @version           0.2
+// @version           0.3
 // @description       在www.icourse163.org中国大学 MOOC 的课程学习页面添加批量下载按钮，方便将视频下载到本地学习
 // @description:en    add download button on www.icourse163.org to download videos
 // @author            charyGao
@@ -179,8 +179,8 @@
             GM_setValue('aria2_url', $('input[name="aria2_url"]').val());
             GM_setValue('course_save_path', $('input[name="save_path"]').val());
 
-            GM_setValue('video_quality', $('input[name="video-quality"]:checked').val());
-            GM_setValue('video_format', $('input[name="video-format"]:checked').val());
+            GM_setValue('video_quality', $('#video_quality option:selected').val());
+            GM_setValue('video_format', $('#video_format option:selected').val());
 
             GM_setValue('isSaveHtm', $('#is_save_htm').prop('checked'));
             GM_setValue('isSaveZip', $('#is_save_zip').prop('checked'));
@@ -591,6 +591,7 @@
             },
             onload: function (response) {
                 mylog(response);
+                alert("done! open AriaNg to look!");
                 if (!hasOpenAriac2Tab) {
                     //GM_openInTab('http://aria2c.com/', { active: true });
                     hasOpenAriac2Tab = true;
