@@ -2,7 +2,7 @@
 // @name              中国大学 MOOC www.icourse163.org ADown下载助手
 // @name:en           www.icourse163.org Downloader
 // @namespace         https://www.cnblogs.com/Chary/
-// @version           1.0
+// @version           1.1
 // @description       在www.icourse163.org中国大学 MOOC 的课程学习页面添加批量下载按钮，方便将视频下载到本地学习
 // @description:en    add download button on www.icourse163.org to download videos
 // @author            charyGao
@@ -147,7 +147,7 @@
                 '<option value="2" ' + (video_quality == 2 ? 'selected' : '') + '>2.高清</option>' +
                 '<option value="3" ' + (video_quality == 3 ? 'selected' : '') + '>3.超清</option>' +
                 '</select>格式:<select id="video_format">' +
-                // '<option value="hls" ' + (video_format == 'hls' ? 'selected' : '') + '>hls(m3u8)</option>' +
+                '<option value="hls" ' + (video_format == 'hls' ? 'selected' : '') + '>hls(m3u8)</option>' +
                 '<option value="mp4" ' + (video_format == 'mp4' ? 'selected' : '') + '>mp4</option>' +
                 '<option value="flv" ' + (video_format == 'flv' ? 'selected' : '') + '>flv</option></select></div>' +
 
@@ -435,7 +435,7 @@
             "c0-id": "0",
             "c0-e1": "number:" + lesson.section_id,//course_id,
             "c0-e2": "number:" + page_num,// + content_id, 1也行
-            "c0-e3": "boolean:false",
+            "c0-e3": "boolean:true",
             "c0-e4": "number:" + lesson.content_type,
             "c0-param0": "Object_Object:{unitId:reference:c0-e1,pageNum:reference:c0-e2,finished:reference:c0-e3,contentType:reference:c0-e4}",// + content_type,
             "batchId": timestamp
