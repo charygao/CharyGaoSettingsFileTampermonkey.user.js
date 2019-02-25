@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name              中国大学 MOOC www.icourse163.org下载助手（需配合Aria2使用）
+// @name              中国大学 MOOC www.icourse163.org ADown下载助手
 // @name:en           www.icourse163.org Downloader
 // @namespace         https://www.cnblogs.com/Chary/
 // @version           0.1
@@ -592,7 +592,7 @@
             onload: function (response) {
                 mylog(response);
                 if (!hasOpenAriac2Tab) {
-                    GM_openInTab('http://aria2c.com/', { active: true });
+                    //GM_openInTab('http://aria2c.com/', { active: true });
                     hasOpenAriac2Tab = true;
                 }
             }
