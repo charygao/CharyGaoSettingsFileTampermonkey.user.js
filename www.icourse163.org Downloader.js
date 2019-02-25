@@ -2,7 +2,7 @@
 // @name              中国大学 MOOC www.icourse163.org ADown下载助手
 // @name:en           www.icourse163.org Downloader
 // @namespace         https://www.cnblogs.com/Chary/
-// @version           0.1
+// @version           0.2
 // @description       在www.icourse163.org中国大学 MOOC 的课程学习页面添加批量下载按钮，方便将视频下载到本地学习
 // @description:en    add download button on www.icourse163.org to download videos
 // @author            charyGao
@@ -537,7 +537,7 @@
                 var videoUrls = response.result.videos;
                 var video_url_list = [];
                 videoUrls.forEach(function (video) {
-                    if (video.format == video_format) {
+                    if (video.format == video_format && video.quality == video_quality) {
                         video_url_list.push({ 'video_format': video.format, 'video_quality': video.quality, 'video_url': video.videoUrl });
                     }
                 });
