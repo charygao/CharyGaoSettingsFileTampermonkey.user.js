@@ -1,10 +1,8 @@
 // ==UserScript==
-// @name              网易云已付费课堂study.163.com FreeLess ADown下载助手
-// @name:en           Study163FreeLess ADown
+// @name              Study163FreeLess ADown
 // @namespace         https://www.cnblogs.com/Chary/
-// @version           0.2
-// @description       在网易云课堂的Header处添加下载助手按钮/批量下载和单个下载/，方便将视频下载到本地学习
-// @description:en    add download button on study.163.com Html Header to download videos
+// @version           2019.06.23
+// @description       add download button on study.163.com Html Header to download videos
 // @author            CharyGao
 // @require           https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js
 // @require           https://cdn.bootcss.com/crypto-js/3.1.9-1/crypto-js.min.js
@@ -129,8 +127,9 @@
         ]
     };
 
-
-
+    var charEnlist1 = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
+    var charEnlist2 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+    var charEnlist3 = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
     function loadMatrixPassword(v) {
         let matrixStr = "";
@@ -142,8 +141,9 @@
 
     function stringToUintArray(cipherStr) {
         let uint8Array = new Uint8Array(new ArrayBuffer(cipherStr.length));
-        for (let index = 0; index < cipherStr.length; index++)
-            uint8Array[index] = cipherStr.charCodeAt(index); //方法可返回指定位置的字符的 Unicode 编码
+        for (let index = 0; index < cipherStr.length; index++) {
+            uint8Array[index] = cipherStr.charCodeAt(index);
+        } //方法可返回指定位置的字符的 Unicode 编码
         return uint8Array;
     }
 
