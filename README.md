@@ -1,22 +1,21 @@
-# 网易云课堂mooc.study.163.com Adown下载助手
+# video Adown下载助手
 
 ## 功能
 
-在mooc.study.163.com的课程学习页面添加批量下载按钮，用来下载视频和文档资源，可以进行下载设置，下载功能由 Aria2 提供，所以下载课程前一定要配置好 Aria2，不然脚本无效。
+在线课程学习页面添加批量下载按钮，用来下载视频和文档资源，可以进行下载设置，下载功能由 Aria2 提供，所以下载课程前一定要配置好 Aria2，不然脚本无效。
 
 ## 参考脚本
 
->参考 [中国大学 MOOC 下载助手](https://greasyfork.org/zh-CN/scripts/372684-中国大学-mooc-下载助手-需配合aria2使用)
-改写而成。
+>参考 各大 现有脚本（Python、Java、JavaScript、C#、Ruby、Go）改写而成改写而成。
 
 ## 注意
 
-1. 请注意你所在的学习页面的地址，形式为https://mooc.study.163.com/learn/xxx 这样的才会有批量下载按钮，也就是你必须先参加这门课；
+1. 请注意你所在的学习页面的地址，形式为https://1——6——3/learn/xxx 这样的才会有批量下载按钮，也就是你必须先参加这门课；
 1. 使用时，必须登录，并允许cookie读取，和JavaScript运行；
 1. 第一次使用脚本时，请先点击下载设置，然后填写你要下载视频的保存地址（否则使用默认值）其中htm文件会调用浏览器默认下载工具；
 1. Chrome 浏览器、Firefox 浏览器、Safari 浏览器都已测试可正常使用，至于其他浏览器看缘分；
 1. 此脚本的目的只为方便个人学习，请勿用于商业用途，否则后果自负；
-1. 在使用中有任何问题请[**反馈**](https://greasyfork.org/zh-CN/scripts/377916-网易云课堂mooc-study-163-com下载助手-需配合aria2使用/feedback)，或者可以加我一起交流，如需更多实用脚本，请访问我的[**主页**](https://greasyfork.org/zh-CN/users/195848-charygao)查看；祝大家使用愉快^_^!
+1. 在使用中有任何问题请[**反馈**](https://greasyfork.org/zh-CN/scripts/377916-网易云课堂mooc-study-163-com下载助手-需配合aria2使用/feedback)，或者可以加我一起交流，如需更多实用脚本，请访问我的[**主页**](https://greasyfork.org/zh-CN/users/195848-charygao)查看；【因版权问题，不在提供支持！】
 
 ## 其他信息
 
