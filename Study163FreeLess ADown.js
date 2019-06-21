@@ -2,7 +2,7 @@
 // @name              网易云已付费课堂study.163.com FreeLess ADown下载助手
 // @name:en           Study163FreeLess ADown
 // @namespace         https://www.cnblogs.com/Chary/
-// @version           0.1
+// @version           0.2
 // @description       在网易云课堂的Header处添加下载助手按钮/批量下载和单个下载/，方便将视频下载到本地学习
 // @description:en    add download button on study.163.com Html Header to download videos
 // @author            CharyGao
@@ -47,10 +47,58 @@
         getCourseInfo(); //1.获取课程信息
         loadSetting(); //2.加载个人设置
         addDownloadAssistant(); //3.添加下载助手按钮
+        addDownloadButton(); //4.添加单个下载按钮
         showTextArea();
         $("#Study163FreeLessAdownTextDiv").hide();
         mylog("Study.163.com FreeLess ADown加载完成~ aria2c --input-file=");
     }, 5000); //页面加载完成后延时2秒执行
+
+
+
+    // 添加下载按钮
+    function addDownloadButton() {
+        var ksbtn = document.getElementsByClassName('ksbtn')[0];
+        var ksbtn_style = 'display:' + getStyle(ksbtn, 'display') + ';width:' + getStyle(ksbtn, 'width') + ';background-position:' + getStyle(ksbtn, 'background-position') + ';margin-top:' + getStyle(ksbtn, 'margin-top') + ';';
+        var ksbtn_span = ksbtn.firstChild;
+        var ksbtn_span_style = 'display:' + getStyle(ksbtn_span, 'display') + ';text-align:' + getStyle(ksbtn_span, 'text-align') + ';background:' + getStyle(ksbtn_span, 'background') +
+            ';width:' + getStyle(ksbtn_span, 'width') + ';font-size:' + getStyle(ksbtn_span, 'font-size') + ';height:' + getStyle(ksbtn_span, 'height') + ';line-height:' +
+            getStyle(ksbtn_span, 'line-height') + ';color:' + getStyle(ksbtn_span, 'color') + ';background-position:' + getStyle(ksbtn_span, 'background-position') + ';';
+        var allNodes = document.getElementsByClassName("section");
+        for (var i = 0; i < allNodes.length; i++) {
+            var download_button = document.createElement("a");
+            download_button.innerHTML = "<span>下载</span>";
+            download_button.className = "f-fr j-hovershow download-button";
+            download_button.style = ksbtn_style;
+            download_button.lastChild.style = ksbtn_span_style;
+            allNodes[i].appendChild(download_button);
+        }
+        $('.download-button').each(function() { //下载按钮点击事件
+            $(this).click(function(event) {
+                loadSetting();
+
+                var data_chapter = event.target.parentNode.parentNode.getAttribute("data-chapter");
+                var data_lesson = event.target.parentNode.parentNode.getAttribute("data-lesson");
+                var index = Number(data_lesson);
+                for (var i = 0; i < Number(data_chapter); i++) {
+                    index = index - course_info.chapter_info[i].lesson_info.length;
+                }
+                var lesson = course_info.chapter_info[data_chapter].lesson_info[index];
+                mylog("选择的课为【lesson_name: " + lesson.lesson_name + ",lesson_id: " + lesson.lesson_id + ",lesson_type: " + lesson.lesson_type + '】');
+                var file_name = lesson.keshi + '_' + lesson.lesson_name;
+                var save_path = course_info.course_name + '-章节' + (Number(data_chapter) + 1) + '_' + course_info.chapter_info[data_chapter].chapter_name;
+                if (lesson.lesson_type == '2') { //2 视频
+                    getVideoLearnInfo(lesson, file_name, save_path);
+                } else if (lesson.lesson_type == "3") { //3 文档
+                    getTextLearnInfo(lesson, file_name, save_path);
+                } else {
+                    mylog('error:' + file_name, lesson);
+                }
+
+                event.stopPropagation();
+            });
+        });
+    }
+
 
     //#region 加解密
 
@@ -82,9 +130,6 @@
     };
 
 
-    var charEnlist1 = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
-    var charEnlist2 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
-    var charEnlist3 = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
 
     function loadMatrixPassword(v) {
@@ -166,14 +211,14 @@
         course_info.course_price = courseVo.price; //课程价格
         var chapter = courseVo.chapterDtos; //课程章节
         var allSeconds = 0; //课程总时长，单位为秒
-        chapter.forEach(function(chapterCourse, chapterCourseindex) {
+        chapter.forEach(function(chapterCourse) {
             var chapter = {
                 'chapter_id': chapterCourse.id,
                 'chapter_name': chapterCourse.name.replace(/:|\?|\*|"|<|>|\|/g, " "),
                 'lesson_info': []
             }; //章节信息
             var lessonDtos = chapterCourse.lessonDtos;
-            lessonDtos.forEach(function(val, index) {
+            lessonDtos.forEach(function(val) {
                 var lesson = {
                     'keshi': val.ksstr,
                     'lesson_id': val.id,
@@ -389,7 +434,6 @@
                 var videoUrls = response.result.videos;
                 var video_url_list = [];
                 var video_url_back_OtherFormat = {};
-                var thisDownLoadResponseResultVideoId = response.result.videoId;
                 videoUrls.forEach(function(video) {
                     if (video.format == video_format && video.quality == video_quality) {
                         video_url_list.push({ 'video_format': video.format, 'video_quality': video.quality, 'video_url': video.videoUrl, 'k': video.k, 'v': video.v });
@@ -430,7 +474,6 @@
     //6.将下载链接发送到 Aria2 下载
     function sendDownloadTaskToAria2(download_url, file_name, save_path) {
         var fileFullName = save_path + '-' + file_name;
-        // $('#Study163FreeLessAdownTextArea').append(download_url + '\n dir=output\n out=' + fileFullName + '\n');
         //return;
         var json_rpc = {
             id: '',
@@ -459,20 +502,22 @@
 
     //6. 将下载链接发送到 M3u8 下载
     function sendDownloadTextToM3u8(download_url, file_name, save_path, e) {
-        //mylog(download_url + '\n\t' + save_path + '-' + file_name + '\n');
-        //console.log(download_url + '\n dir=' + save_path + '\n out=' + file_name+'\n');
         //展平处理//var fileFullName 
-        // var timestamp = new Date().getTime();
         let decryptAESstr = decryptAES(e.k, e.v);
 
 
         var fileFullName = save_path + '-' + file_name;
         $('#Study163FreeLessAdownTextArea').append(fileFullName + ',' + download_url + '&token=' +
-            generateUrl(e.video_url, decryptAESstr.k)
-            // 'https%3A%2F%2Fvod.study.163.com%2Feds%2Fapi%2Fv1%2Fvod%2Fhls%2Fkey%3Fid%3D' + responsedVideoId +
-            // '%26token%3D' + keyOrg + '&t=' + timestamp
-            +
-            '\n');
+            generateUrl(e.video_url, decryptAESstr.k) + '\n');
+    }
+
+    //获取元素样式
+    function getStyle(element, cssPropertyName) {
+        if (window.getComputedStyle) { //如果支持getComputedStyle属性（IE9及以上，ie9以下不兼容）
+            return window.getComputedStyle(element)[cssPropertyName];
+        } else { //如果支持currentStyle（IE9以下使用），返回
+            return element.currentStyle[cssPropertyName];
+        }
     }
 
 })();
