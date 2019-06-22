@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              Study163FreeLess ADown
 // @namespace         https://www.cnblogs.com/Chary/
-// @version           2019.06.23
+// @version           2019.06.24
 // @description       add download button on study.163.com Html Header to download videos
 // @author            CharyGao
 // @require           https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js
@@ -100,7 +100,8 @@
 
     //#region 加解密
 
-    var charListMap = {
+    //#region 秘本
+    let charListMap = {
         v_0: [
             { table: 1, item: 2 }, { table: 3, item: 9 }, { table: 3, item: 7 }, { table: 3, item: 2 },
             { table: 1, item: 0 }, { table: 1, item: 4 }, { table: 1, item: 2 }, { table: 3, item: 1 },
@@ -124,54 +125,27 @@
             { table: 1, item: 17 }, { table: 2, item: 15 }, { table: 1, item: 4 }, { table: 2, item: 18 },
             { table: 1, item: 11 }, { table: 2, item: 5 }, { table: 2, item: 18 }, { table: 1, item: 14 },
             { table: 1, item: 0 }, { table: 2, item: 22 }, { table: 1, item: 11 }, { table: 3, item: 5 }
-        ]
+        ],
+        charEnlist1: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"],
+        charEnlist2: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"],
+        charEnlist3: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
     };
+    //#endregion
 
-    var charEnlist1 = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
-    var charEnlist2 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
-    var charEnlist3 = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
-
-    function loadMatrixPassword(v) {
-        let matrixStr = "";
-        charListMap["v_" + v].forEach(function(item) {
-            matrixStr += eval("charEnlist" + (item.table))[item.item];
+    function decryptAES(cipherStr, matrixVersion) {
+        let key = "";
+        charListMap["v_" + matrixVersion].forEach(function(item) {
+            key += charListMap["charEnlist" + (item.table)][item.item];
         });
-        return matrixStr
-    }
-
-    function stringToUintArray(cipherStr) {
-        let uint8Array = new Uint8Array(new ArrayBuffer(cipherStr.length));
-        for (let index = 0; index < cipherStr.length; index++) {
-            uint8Array[index] = cipherStr.charCodeAt(index);
-        } //方法可返回指定位置的字符的 Unicode 编码
-        return uint8Array;
-    }
-
-    function parseStrToArray(str) {
-        let arrayBinary = atob(str);
-        let uint8Array = new Uint8Array(arrayBinary.length);
-        Array.prototype.forEach.call(arrayBinary, function(str, arrayBinary) {
-            uint8Array[arrayBinary] = str.charCodeAt(0); //方法可返回指定位置的字符的 Unicode 编码
-        });
-        return uint8Array;
-    }
-
-    function mapToArray(e) {
-        return btoa(Array.prototype.map.call(e, function(e) {
-            return String.fromCharCode(e) //Unicode 值，然后返回一个字符串。
-        }).join(""));
-    }
-
-    function decryptAES(orgKey, matrixVersion) {
-        let cipher = loadMatrixPassword(matrixVersion);
-        let orgKeyArray = parseStrToArray(orgKey);
-        let key = CryptoJS.enc.Base64.parse(mapToArray(stringToUintArray(cipher)));
-        let iv = CryptoJS.enc.Base64.parse(mapToArray(new Uint8Array(orgKeyArray.buffer, 0, 16)));
-
-        let cipherTextBase64Str = CryptoJS.enc.Base64.parse(mapToArray(new Uint8Array(orgKeyArray.buffer, 16, orgKeyArray.length - 16)));
+        let keyBase64Str = CryptoJS.enc.Utf8.parse(key); //CryptoJS.enc.Base64.parse(CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(key)));
+        let cipherArrayLatin1 = atob(cipherStr);
+        //let iv = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Latin1.parse(cipherArrayLatin1.substring(0, 16)));//bArrayToStr(new Uint8Array(cipherArray.buffer, 0, 16));
+        let ivBase64Str = CryptoJS.enc.Latin1.parse(cipherArrayLatin1.substring(0, 16)); //CryptoJS.enc.Base64.parse(iv);
+        //let cipherText = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Latin1.parse(cipherArrayLatin1.substring(16,cipherArrayLatin1.length)));//bArrayToStr(new Uint8Array(cipherArray.buffer, 16, cipherArray.length - 16));
+        let cipherTextBase64Str = CryptoJS.enc.Latin1.parse(cipherArrayLatin1.substring(16)); //CryptoJS.enc.Base64.parse(cipherText);
         try {
-            return JSON.parse(CryptoJS.AES.decrypt({ ciphertext: cipherTextBase64Str }, key, {
-                iv: iv,
+            return JSON.parse(CryptoJS.AES.decrypt({ ciphertext: cipherTextBase64Str }, keyBase64Str, {
+                iv: ivBase64Str,
                 mode: CryptoJS.mode.CBC,
                 padding: CryptoJS.pad.Pkcs7
             }).toString(CryptoJS.enc.Utf8));
@@ -188,6 +162,8 @@
         else
             return e + "?token=" + encodeURIComponent(t) + "&t=" + (new Date).getTime()
     }
+
+
     //#endregion 加解密
     function showTextArea() {
         if (document.querySelector('#Study163FreeLessAdownTextDiv') == null) {
