@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name              Study163FreeLess ADown
 // @namespace         https://www.cnblogs.com/Chary/
-// @version           2019.06.24
+// @version           2019.06.25
 // @description       add download button on study.163.com Html Header to download videos
 // @author            CharyGao
 // @require           https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js
 // @require           https://cdn.bootcss.com/crypto-js/3.1.9-1/crypto-js.min.js
 // @match             https://study.163.com/course/courseMain.htm?*courseId=*
+// @match             https://study.163.com/course/introduction.htm?*courseId=*
 // @grant             unsafeWindow
 // @grant             GM_getValue
 // @grant             GM_setValue
@@ -56,6 +57,9 @@
     // 添加下载按钮
     function addDownloadButton() {
         var ksbtn = document.getElementsByClassName('ksbtn')[0];
+        if (ksbtn === undefined) {
+            return;
+        }
         var ksbtn_style = 'display:' + getStyle(ksbtn, 'display') + ';width:' + getStyle(ksbtn, 'width') + ';background-position:' + getStyle(ksbtn, 'background-position') + ';margin-top:' + getStyle(ksbtn, 'margin-top') + ';';
         var ksbtn_span = ksbtn.firstChild;
         var ksbtn_span_style = 'display:' + getStyle(ksbtn_span, 'display') + ';text-align:' + getStyle(ksbtn_span, 'text-align') + ';background:' + getStyle(ksbtn_span, 'background') +
@@ -386,7 +390,12 @@
             async: true,
             data: params,
             success: function(response) {
-                var signature = response.match(/signature="(\w+?)";/)[1];
+                var responseSignatures = response.match(/signature="(\w+?)";/);
+                if (responseSignatures == null || responseSignatures.length < 1) {
+                    return;
+                }
+                var signature = responseSignatures[1];
+                // var signature = response.match(/signature="(\w+?)";/)[1];
                 var videoId = response.match(/videoId=(\w+?);/)[1];
                 //mylog(file_name, response);
                 getVideoUrl(videoId, signature, file_name, save_path);
