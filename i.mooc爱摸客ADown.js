@@ -1,10 +1,9 @@
 // ==UserScript==
-// @name            i-mo-oc爱摸课ADown
+// @name            i-mo-oc爱摸客ADown
 // @namespace       https://www.cnblogs.com/Chary/
 // @version         2019.06.23
 // @description     add download button on i-mo-oc Html Header to download videos
 // @author          CharyGao
-// @require         https://cdn.bootcss.com/crypto-js/3.1.9-1/crypto-js.min.js
 // @match           https://www.imooc.com/learn/*
 // @grant           unsafeWindow
 // @grant           GM_getValue
@@ -64,12 +63,13 @@ GM_addStyle( `
 ` );
 //</editor-fold>
 
-(function () {
+(
+    function () {
         'use strict';//启用严格模式
         //<editor-fold desc="0.Fields">
         let windowsNameForbidReg = /[\\/?？*"“”'‘’<>{}\[\]【】：:、^$!~`|]/g;
         let logCount = 1;
-        let videoQuality = 2;//hq_mq_lq:高/中/低-清晰度
+        let videoQuality = 2;//hq_mq_lq:3/2/1:高/中/低-清晰度
         let course = {
             "courseId": "0",
             "courseName": "课名",
@@ -123,7 +123,7 @@ GM_addStyle( `
                             "videoName": videoDirtyName.replace( windowsNameForbidReg, "" ).trim(),
                             "videoUrl": window.location.origin + aHref.getAttribute( "href" ),
                         };
-                        myLog( `选择的课为【${chapterName + videoDirtyName}】`, video );
+                        myLog( `选择的课为【${chapterName + "_" + videoDirtyName}】:`, video );
 
                         let m3u8FileName = (chapterName + "_" + video.videoName).replace( /\s+/g, "" );
 
@@ -190,7 +190,7 @@ GM_addStyle( `
                 } );
                 course.chapters.push( chapter );
             } );
-            myLog( course );
+            myLog( "All Course:", course );
         }
 
         function isLoginAndAddText() {//0.登录检测
@@ -246,53 +246,149 @@ GM_addStyle( `
                 method: 'GET',
             } ).then( response => {
                 if (response.ok) {
-                    myLog( m3u8FileName + "downloadVideo ok!" + response, response.url );
+                    // myLog( `${m3u8FileName}|downloadVideo ok!${response}`, response.url );
                     return response.text();
-                } else {
-                    myLog( m3u8FileName + "downloadVideo error!" + response, response.url );
                 }
-            } ).catch( error => myLog( m3u8FileName + "downloadVideo error!" + error.url, error ) ).then( body => {//body
-                let matchedPageInfo = body.match( /var pageInfo = { mid : (\d+) };/ )[1];// var pageInfo = { mid : 19490 };
-                let matchedVideoId = body.match( /var video_id= (\d+);/ )[1];// var video_id= 18727;
-                let matchedCourseId = body.match( /var course_id = (\d+);/ )[1];// var course_id = 1130;
-                let matchedChapterId = body.match( /var chapter_id = (\d+);/ )[1];// var chapter_id = 5495;
-                let matchedIsPreview = body.match( /var ispreview ='(\d+)';/ )[1];// var ispreview ='0';
-                let matchedVideoTitle = body.match( /var videoTitle = "(.*?)";/ )[1];// var videoTitle = "1-1 课程介绍及学习前须知";
-                let matchedOpConfigMongoId = body.match( /OP_CONFIG.mongo_id="(\w+)";/ )[1];// OP_CONFIG.mongo_id="5ce28b95e420e56b038b456a";
-                let matchedOpConfigPage = body.match( /OP_CONFIG.page="([\w.]+)";/ )[1];// OP_CONFIG.page="video2.4";
-                myLog( m3u8FileName + " matchedPageInfo", matchedPageInfo );
-                myLog( m3u8FileName + " matchedVideoId", matchedVideoId );
-                myLog( m3u8FileName + " matchedCourseId", matchedCourseId );
-                myLog( m3u8FileName + " matchedChapterId", matchedChapterId );
-                myLog( m3u8FileName + " matchedIsPreview", matchedIsPreview );
-                myLog( m3u8FileName + " matchedVideoTitle", matchedVideoTitle );
-                myLog( m3u8FileName + " matchedOpConfigMongoId", matchedOpConfigMongoId );
-                myLog( m3u8FileName + " matchedOpConfigPage", matchedOpConfigPage );
+                throw  response;
+            } )
+                .catch( error => {
+                    throw m3u8FileName + "downloadVideo error!" + error.url + error;
+                } ).then( bodyHtml => {//body
+                let matchedPageInfo = bodyHtml.match( /var pageInfo = { mid : (\d+) };/ )[1];// var pageInfo = { mid : 19490 };
+                let matchedOpConfigMongoId = bodyHtml.match( /OP_CONFIG.mongo_id="(\w+)";/ )[1];// OP_CONFIG.mongo_id="5ce28b95e420e56b038b456a";
+                // let matchedVideoId = body.match( /var video_id= (\d+);/ )[1];// var video_id= 18727;
+                // let matchedCourseId = body.match( /var course_id = (\d+);/ )[1];// var course_id = 1130;
+                // let matchedChapterId = body.match( /var chapter_id = (\d+);/ )[1];// var chapter_id = 5495;
+                // let matchedIsPreview = body.match( /var ispreview ='(\d+)';/ )[1];// var ispreview ='0';
+                // let matchedVideoTitle = body.match( /var videoTitle = "(.*?)";/ )[1];// var videoTitle = "1-1 课程介绍及学习前须知";
+                // let matchedOpConfigPage = body.match( /OP_CONFIG.page="([\w.]+)";/ )[1];// OP_CONFIG.page="video2.4";
+                // myLog( `${m3u8FileName} matchedPageInfo`, matchedPageInfo );
+                // myLog( `${m3u8FileName} matchedOpConfigMongoId`, matchedOpConfigMongoId );
+                // myLog( `${m3u8FileName} matchedVideoId`, matchedVideoId );
+                // myLog( `${m3u8FileName} matchedCourseId`, matchedCourseId );
+                // myLog( `${m3u8FileName} matchedChapterId`, matchedChapterId );
+                // myLog( `${m3u8FileName} matchedIsPreview`, matchedIsPreview );
+                // myLog( `${m3u8FileName} matchedVideoTitle`, matchedVideoTitle );
+                // myLog( `${m3u8FileName} matchedOpConfigPage`, matchedOpConfigPage );
 
                 getM3u8DownloadUrls( matchedPageInfo, matchedOpConfigMongoId, m3u8FileName, video );
             } );
         }
 
-        function getM3u8DownloadUrls(pageInfo, opConfigMongoId, m3u8FileName, video) {/*step2/4获取三个M3u8下载地址*/
-            //https://www.imooc.com/course/playlist/19490?t=m3u8&_id=5ce28b95e420e56b038b456a&cdn=aliyun1
+        function getM3u8DownloadUrls(pageInfo, opConfigMongoId, m3u8FileName, video) {//step2/4获取三个M3u8下载地址
             fetch( "https://www.imooc.com/course/playlist/"
                 + pageInfo + "?t=m3u8&_id=" + opConfigMongoId + "&cdn=aliyun1",
+                //https://www.imooc.com/course/playlist/19490?t=m3u8&_id=5ce28b95e420e56b038b456a&cdn=aliyun1
                 {
                     credentials: 'include',//For CORS requests
                     method: 'GET',
                 } ).then( response => {
                 if (response.ok) {
-                    myLog( m3u8FileName + "getM3u8DownloadUrls ok!", response.url );
+                    // myLog( `${m3u8FileName}|getM3u8DownloadUrls ok!`, response.url );
                     return response.json();
-                } else {
-                    myLog( m3u8FileName + "getM3u8DownloadUrls error!", response.url );
                 }
-            } ).catch( error => myLog( m3u8FileName + "getM3u8DownloadUrls error!" + error.url, error ) ).then( m3u8CipherJson => {
-                if (!m3u8CipherJson.data || !m3u8CipherJson.data.info) {
-                    myLog( m3u8FileName + "getM3u8DownloadUrls error!", m3u8CipherJson );
+                throw  response;
+            } ).catch(
+                error => {
+                    throw m3u8FileName + "getM3u8DownloadUrls error!" + error.url + error;
+                } ).then( m3u8UrlsCipherJson => {
+                if (!m3u8UrlsCipherJson.data || !m3u8UrlsCipherJson.data.info) throw "return empty!" + JSON.stringify( m3u8UrlsCipherJson );
+
+                let decryptUrlsString = decryptDefault( m3u8UrlsCipherJson.data.info );
+                // myLog( `${m3u8FileName}|返回的下载地址decryptUrlsString：`, decryptUrlsString );
+                let regExp = /#EXT-X-STREAM-INF:([^\n\r]*)[\r\n]+([^\r\n]+)/g;
+                regExp.lastIndex = 0;
+                video.m3u8Urls = [];
+                while (true) {
+                    let groupVideos = regExp.exec( decryptUrlsString );
+                    if (groupVideos == null) break;
+                    // myLog( groupVideos );
+                    video.m3u8Urls.push( {
+                        "M3u8Index": groupVideos[1],
+                        "Url": groupVideos[2],
+                    } );
                 }
-                //step3getOneKindLevelM3u8ContentAndKeyUrl//获取m3u8内容
-                //step4getM3u8Key//获取密钥
+                // myLog( `${m3u8FileName}|m3u8地址1：`, JSON.stringify( video.m3u8Urls ) );
+                video.m3u8Urls = jsonSort( video.m3u8Urls, "M3u8Index", false );//确保3/2/1:高/中/低videoQuality = 2;//hq_mq_lq:3/2/1:高/中/低-清晰度
+                // myLog( `${m3u8FileName}|m3u8地址2：`, JSON.stringify( video.m3u8Urls ) );
+                let selectedQualityM3u8DownloadUrl = video.m3u8Urls[videoQuality - 1].Url;
+                // myLog( `${m3u8FileName}|3/2/1:高/中/低videoQuality=${videoQuality}：`, selectedQualityM3u8DownloadUrl );
+                getM3u8Contents( selectedQualityM3u8DownloadUrl, m3u8FileName, video );
+            } );
+        }
+
+        function getM3u8Contents(m3u8FileUrl, m3u8FileName, video) {//step3/4getOneKindLevelM3u8ContentAndKeyUrl//获取m3u8内容
+            fetch( m3u8FileUrl, {
+                credentials: 'include',//For CORS requests
+                method: 'GET',
+            } ).then( response => {
+                if (response.ok) {
+                    // myLog( `${m3u8FileName}|getM3u8Contents ok!`, response.url );
+                    return response.json();
+                }
+                throw  response;
+            } ).catch(
+                error => {
+                    throw m3u8FileName + "getM3u8Contents error!" + error.url + error;
+                } ).then( m3u8ContentCipherJson => {
+                    if (!m3u8ContentCipherJson.data || !m3u8ContentCipherJson.data.info) throw "return empty!" + JSON.stringify( m3u8ContentCipherJson );
+
+                    let decryptContentString = decryptDefault( m3u8ContentCipherJson.data.info );
+                    let regExp = /#EXT-X-KEY:METHOD=AES-128,URI="(.*?)"/g;
+                    //regExp.lastIndex = 0;
+                    video.m3u8KeyUrl = regExp.exec( decryptContentString )[1];//"";
+                    // while (true) {
+                    //     let m3u8KeyUrl = regExp.exec( decryptBase64ContentDecodeString );
+                    //     if (m3u8KeyUrl == null) {
+                    //         break;
+                    //     }
+                    //     myLog( m3u8KeyUrl );
+                    //     video.m3u8KeyUrl = m3u8KeyUrl[1];
+                    // }
+
+                    // myLog( `${m3u8FileName}|m3u8内容：\n`, decryptContentString );
+                    // myLog( `${m3u8FileName}|m3u8keyUrl：\n`, video.m3u8KeyUrl );
+                    regExp.lastIndex = 0;//先置零，方便后一步骤调用
+                    getM3u8Key( decryptContentString, regExp, m3u8FileName, video )
+                }
+            );
+        }
+
+        function getM3u8Key(decodeContent, keyMatchRegExp, m3u8FileName, video) {//step4/4getM3u8Key//获取密钥
+            fetch( video.m3u8KeyUrl, {
+                credentials: 'include',//For CORS requests
+                method: 'GET',
+            } ).then( response => {
+                if (response.ok) {
+                    // myLog( `${m3u8FileName}|getM3u8Key ok!`, response.url );
+                    return response.json();
+                }
+                throw  response;
+            } ).catch(
+                error => {
+                    throw m3u8FileName + "getM3u8Key error!" + error.url + error;
+                } ).then( m3u8KeyCipherJson => {
+                if (!m3u8KeyCipherJson.data || !m3u8KeyCipherJson.data.info) throw "return empty!" + JSON.stringify( m3u8KeyCipherJson );
+                // myLog( `${m3u8FileName}|m3u8key返回的加密内容：\n`, m3u8KeyCipherJson );
+                let decryptKeyString = decryptDefault( m3u8KeyCipherJson.data.info );
+                // myLog( `${m3u8FileName}|m3u8key内容：\n`, decryptKeyString );
+                video.base64KeyString = base64encode( decryptKeyString );
+                let finalDecodeContent = decodeContent.replace( keyMatchRegExp, `#EXT-X-KEY:METHOD=AES-128,URI="base64:${video.base64KeyString}"` );
+                // myLog( `${m3u8FileName}\n`, finalDecodeContent );
+                let downLoadM3u8FileName = m3u8FileName;
+                switch (videoQuality) {//确保3/2/1:高/中/低videoQuality = 2;//hq_mq_lq:3/2/1:高/中/低-清晰度
+                    case "3":
+                        downLoadM3u8FileName += ".hq.m3u8";
+                        break;
+                    case "2":
+                        downLoadM3u8FileName += ".mq.m3u8";
+                        break;
+                    case "1":
+                        downLoadM3u8FileName += ".lq.m3u8";
+                        break;
+                }
+                sendDownloadTextToM3u8( downLoadM3u8FileName );
+                exportRaw( downLoadM3u8FileName, finalDecodeContent );
             } );
         }
 
@@ -300,156 +396,232 @@ GM_addStyle( `
 
         //<editor-fold desc="3.加解密">
 
+        function decryptDefault(data, isReturnArray) {
 
-        function decryptBase64Default(data, isPlaintext) {//原字符串，是否为明文
-            let c;
-            let arrayObj = {data: {info: data}};
-            let s = {
-                q: function (t, e) {//r
-                    var r = "";
-                    if ("object" == typeof t) {
-                        for (var n = 0; n < t.length; n++) {
-                            r += String.fromCharCode( t[n] );
-                        }
-                    }
-                    t = r || t;
-                    for (var i, o, a = new Uint8Array( t.length ), s = e.length, n = 0; n < t.length; n++) {
-                        o = n % s,
-                            i = t[n],
-                            i = i.toString().charCodeAt( 0 ),
-                            a[n] = i ^ e.charCodeAt( o );
-                    }
-                    return a
+            //<editor-fold desc="0.属性定义">
+            const aResultObj = {data: {info: data}};
+            const functionsMap = {
+                q: function r(sourceCArray, password) {
+                    let recodeString = "";
+                    if ("object" == typeof sourceCArray) sourceCArray.forEach( currentChar => recodeString += String.fromCharCode( currentChar ) );
+                    sourceCArray = recodeString || sourceCArray;//拼接字符串
+
+                    let resultUint8Array = new Uint8Array( sourceCArray.length );
+                    //document.write( `sourceString:${sourceCArray}<br />` );
+                    for (let index = 0; index < sourceCArray.length; index++) resultUint8Array[index] = sourceCArray[index].toString().charCodeAt( 0 ) ^ password.charCodeAt( index % password.length );
+                    //tableSource.split( "" ).forEach( (currentItem, index) => resultUint8Array[index] = currentItem.toString().charCodeAt( 0 ) ^ password.charCodeAt( index % password.length ) );
+
+                    return resultUint8Array;
                 },
-                h: function (t) {//n
-                    var e = "";
-                    if ("object" == typeof t) {
-                        for (var r = 0; r < t.length; r++) {
-                            e += String.fromCharCode( t[r] );
-                        }
+                k: function o(sourceCArray, password) {
+                    var n = 0, i = 0, o = 0, recodeString = "";
+                    if ("object" == typeof sourceCArray) sourceCArray.forEach( currentChar => recodeString += String.fromCharCode( currentChar ) );
+                    sourceCArray = recodeString || sourceCArray;//拼接字符串
+
+                    const resultUint8Array = new Uint8Array( sourceCArray.length );
+                    // document.write( `sourceString:${sourceCArray}<br />` );
+
+                    // sourceCArray.split("").forEach( (currentItem, index) => resultUint8Array[index] = currentItem.toString().charCodeAt( 0 ) );
+                    for (let index = 0; index < sourceCArray.length; index++) resultUint8Array[index] = sourceCArray[index].toString().charCodeAt( 0 );
+
+                    for (let r = 0; r < sourceCArray.length; r++) {
+                        if (0 !== (o = resultUint8Array[r] % 5) && 1 !== o && r + o < resultUint8Array.length && (i = resultUint8Array[r + 1],
+                            n = r + 2,
+                            resultUint8Array[r + 1] = resultUint8Array[r + o],
+                            resultUint8Array[o + r] = i,
+                        (r = r + o + 1) - 2 > n))
+                            for (; n < r - 2; n++)
+                                resultUint8Array[n] = resultUint8Array[n] ^ password.charCodeAt( n % password.length );
                     }
-                    t = e || t;
-                    var n = new Uint8Array( t.length );
-                    for (r = 0; r < t.length; r++) {
-                        n[r] = t[r].toString().charCodeAt( 0 );
-                    }
+                    for (let r = 0; r < sourceCArray.length; r++)
+                        resultUint8Array[r] = resultUint8Array[r] ^ password.charCodeAt( r % password.length );
+                    return resultUint8Array;
+                },
+                h: function n(sourceCArray) {
+                    let recodeString = "";
+                    if ("object" == typeof sourceCArray) sourceCArray.forEach( currentChar => recodeString += String.fromCharCode( currentChar ) );
+
+                    sourceCArray = recodeString || sourceCArray;
+                    var resultUint8Array = new Uint8Array( sourceCArray.length );
+                    // document.write( `sourceString:${sourceCArray}<br />` );
+
+                    for (r = 0; r < sourceCArray.length; r++)
+                        resultUint8Array[r] = sourceCArray[r].toString().charCodeAt( 0 );
                     var i, o, r = 0;
-                    for (r = 0; r < n.length; r++) {
-                        0 != (i = n[r] % 3) && r + i < n.length && (o = n[r + 1],
-                            n[r + 1] = n[r + i],
-                            n[r + i] = o,
+                    for (r = 0; r < resultUint8Array.length; r++)
+                        0 !== (i = resultUint8Array[r] % 3) && r + i < resultUint8Array.length && (o = resultUint8Array[r + 1],
+                            resultUint8Array[r + 1] = resultUint8Array[r + i],
+                            resultUint8Array[r + i] = o,
                             r = r + i + 1);
-                    }
-                    return n
+                    return resultUint8Array;
                 },
-                m: function (t) {//i
-                    var e = "";
-                    if ("object" == typeof t)
-                        for (var r = 0; r < t.length; r++)
-                            e += String.fromCharCode( t[r] );
-                    t = e || t;
-                    var n = new Uint8Array( t.length );
-                    for (r = 0; r < t.length; r++)
-                        n[r] = t[r].toString().charCodeAt( 0 );
+                m: function i(sourceCArray) {
+                    var recodeString = "";
+                    if ("object" == typeof sourceCArray) sourceCArray.forEach( currentChar => recodeString += String.fromCharCode( currentChar ) );
+
+                    sourceCArray = recodeString || sourceCArray;
+                    var n = new Uint8Array( sourceCArray.length );
+                    // document.write( `sourceString:${sourceCArray}<br />` );
+
+                    for (r = 0; r < sourceCArray.length; r++)
+                        n[r] = sourceCArray[r].toString().charCodeAt( 0 );
                     var r = 0, i = 0, o = 0, a = 0;
-                    for (r = 0; r < n.length; r++) {
+                    for (r = 0; r < n.length; r++)
                         o = n[r] % 2,
                         o && r++,
                             a++;
-                    }
-                    var s = new Uint8Array( a );
-                    for (r = 0; r < n.length; r++) {
+                    var resultUint8Array = new Uint8Array( a );
+                    for (r = 0; r < n.length; r++)
                         o = n[r] % 2,
-                            s[i++] = o ? n[r++] : n[r];
-                    }
-                    return s
+                            resultUint8Array[i++] = o ? n[r++] : n[r];
+                    return resultUint8Array;
                 },
-                k: function (t, e) {//o
-                    var r = 0, n = 0, i = 0, o = 0, a = "";
-                    if ("object" == typeof t) {
-                        for (var r = 0; r < t.length; r++)
-                            a += String.fromCharCode( t[r] );
-                    }
-                    t = a || t;
-                    var s = new Uint8Array( t.length );
-                    for (r = 0; r < t.length; r++) {
-                        s[r] = t[r].toString().charCodeAt( 0 );
-                    }
-                    for (r = 0; r < t.length; r++) {
-                        if (0 != (o = s[r] % 5) && 1 != o && r + o < s.length && (i = s[r + 1],
-                            n = r + 2,
-                            s[r + 1] = s[r + o],
-                            s[o + r] = i,
-                        (r = r + o + 1) - 2 > n))
-                            for (; n < r - 2; n++)
-                                s[n] = s[n] ^ e.charCodeAt( n % e.length );
-                    }
-                    for (r = 0; r < t.length; r++) {
-                        s[r] = s[r] ^ e.charCodeAt( r % e.length );
-                    }
-                    return s
-                }
+
             };
-            let dataCopy = arrayObj.data.info;
-            let user4cKey = data.substring( data.length - 4 ).split( "" );//截取后4位
+            let lastDataCopy = data, used4cArray = lastDataCopy.substring( lastDataCopy.length - 4 ).split( "" );//截取后4位
+            // document.write( `---------org[${lastDataCopy.length}]:${lastDataCopy}<br />` );
+            //</editor-fold>
 
-            user4cKey.forEach( (item, index, theArray) => {
-                theArray[index] = item.toString().charCodeAt( 0 ) % 4;//指定位置上字符的 Unicode 编码,余4;
-            } );
-            user4cKey.reverse();//3,1,1,0//反转//第一次取位
-            document.write( "反转:" + user4cKey + "<br />" );
-            document.write( "dataA:" + dataCopy + "<br />" );
-            arrayObj.data.encrypt_table = [];
-            user4cKey.forEach( (currentItem) => {//选定位置的字符作为密钥，并从原字符中移除（剔除4个字符）
-                arrayObj.data.encrypt_table.push( dataCopy.substring( currentItem + 1, currentItem + 2 ) );
-                dataCopy = dataCopy.substring( 0, currentItem + 1 ) + dataCopy.substring( currentItem + 2 );
-            } );
-            document.write( "dataB:" + dataCopy + "<br />" );
-            //document.write( "encryptTableA:" + a.data.encrypt_table + "<br />" );
-            arrayObj.data.key_table = [];
-            arrayObj.data.encrypt_table.forEach( (currentItem) => {
-                if ("q" !== currentItem && "k" !== currentItem) {
-                    return;//for(var c in a.data.encrypt_table)("q" != a.data.encrypt_table[c] && "k" != a.data.encrypt_table[c]) || (a.data.key_table.push( l.substring( l.length - 12 ) ), l = l.substring( 0, l.length - 12 ));//短路运算
-                }//4个字符中，不是q，k，跳过。
-                arrayObj.data.key_table.push( dataCopy.substring( dataCopy.length - 12 ) );
-                dataCopy = dataCopy.substring( 0, dataCopy.length - 12 );//有几个q，k，原串减少几个*12个字符；
-            } );
-            document.write( "dataC:" + dataCopy + "<br />" );
-            //document.write( "encryptTableB:" + arrayObj.data.encrypt_table + "<br />" );
-            arrayObj.data.key_table.reverse();
-            //document.write( "encryptTableC:" + arrayObj.data.encrypt_table + "<br />" );
+            //<editor-fold desc="1.获取第一次keyChar">
+            used4cArray.forEach( (currentItem, index, theArray) => theArray[index] = currentItem.toString().charCodeAt( 0 ) % 4 );//指定位置上字符的 Unicode 编码,余4;
+            used4cArray.reverse();//反转,第一次取位
+            // document.write( `反转:${used4cArray}<br />` );
+            //</editor-fold>
 
-            // const f = [
-            //     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            //     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62,
-            //     -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0,
-            //     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-            //     25, -1, -1, -1, -1, -1, -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-            //     41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1
-            // ];
-
-            arrayObj.data.info =  CryptoJS.enc.Utf8.stringify( CryptoJS.enc.Base64.parse( dataCopy ) );
-
-            for (c in arrayObj.data.encrypt_table) {
-                let h = arrayObj.data.encrypt_table[c];
-                if ("q" === h || "k" === h) {
-                    let p = arrayObj.data.key_table.pop();
-                    arrayObj.data.info = s[arrayObj.data.encrypt_table[c]]( arrayObj.data.info, p )
-                } else
-                    arrayObj.data.info = s[arrayObj.data.encrypt_table[c]]( arrayObj.data.info )
-            }
-            if (isPlaintext) return arrayObj.data.info;
-            let gotPlaintext = "";
-            arrayObj.data.info.forEach( function (itemChar) {
-                gotPlaintext += String.fromCharCode( itemChar );
+            //<editor-fold desc="2.获取加密key轮盘">
+            aResultObj.data.encrypt_table = [];//加密key轮盘
+            used4cArray.forEach( function (keyChar) {//选定位置的字符作为密钥，并从原字符中移除（剔除4个字符）
+                aResultObj.data.encrypt_table.push( lastDataCopy.substring( keyChar + 1, keyChar + 2 ) );
+                lastDataCopy = lastDataCopy.substring( 0, keyChar + 1 ) + lastDataCopy.substring( keyChar + 2 );
             } );
-            return gotPlaintext;
+            // document.write( `encryptTable:${aResultObj.data.encrypt_table}<br />` );
+            // document.write( `EncryptTable[${lastDataCopy.length}]:${lastDataCopy}<br />` );
+            //</editor-fold>
+
+            //<editor-fold desc="3.根据加密轮盘获得解密的key矩阵">
+            aResultObj.data.key_table = [];
+            aResultObj.data.encrypt_table.forEach( function (curEncryptKeyChar) {
+                //for(var c in a.data.encrypt_table)
+                if ("q" !== curEncryptKeyChar && "k" !== curEncryptKeyChar) return;//4个字符中，不是q，k，跳过。
+                // ("q" != a.data.encrypt_table[c] && "k" != a.data.encrypt_table[c]) ||
+                // (a.data.key_table.push( l.substring( l.length - 12 ) ), l = l.substring( 0, l.length - 12 ));//短路运算
+                aResultObj.data.key_table.push( lastDataCopy.substring( lastDataCopy.length - 12 ) );
+                lastDataCopy = lastDataCopy.substring( 0, lastDataCopy.length - 12 );//有N个q，k，原串减少N*12个字符；
+            } );
+            aResultObj.data.key_table.reverse();//反转,第二次取位
+            // document.write( `keyTable:${aResultObj.data.key_table}<br />` );
+            // document.write( `----KeyTable[${lastDataCopy.length}]:${lastDataCopy}<br />` );
+            //</editor-fold>
+
+            //<editor-fold desc="4.4种解密算法">
+            aResultObj.data.info = (source => {
+                const tableFetch = [
+                    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59,
+                    60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                    21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42,
+                    43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1
+                ];
+                let isEndCharFromFetch, reEndCharFromFetch, nextChar, increaseChar, order, sourceLength = source.length,
+                    securityCode = "";
+                for (order = 0; order < sourceLength;) {//分4端；
+
+                    do {
+                        isEndCharFromFetch = tableFetch[255 & source.charCodeAt( order++ )]
+                    } while (order < sourceLength && -1 === isEndCharFromFetch);
+                    if (-1 === isEndCharFromFetch) break; //碰到暗装，跳出！
+
+                    do {
+                        reEndCharFromFetch = tableFetch[255 & source.charCodeAt( order++ )];
+                    } while (order < sourceLength && -1 === reEndCharFromFetch);
+                    if (-1 === reEndCharFromFetch) break;//碰到暗装，跳出！
+
+                    securityCode += String.fromCharCode( isEndCharFromFetch << 2 | (48 & reEndCharFromFetch) >> 4 );
+
+                    do {
+                        if (61 === (nextChar = 255 & source.charCodeAt( order++ ))) return securityCode;
+                        nextChar = tableFetch[nextChar];
+                    } while (order < sourceLength && -1 === nextChar);
+                    if (-1 === nextChar) break;//碰到暗装，跳出！
+
+                    securityCode += String.fromCharCode( (15 & reEndCharFromFetch) << 4 | (60 & nextChar) >> 2 );
+
+                    do {
+                        if (61 === (increaseChar = 255 & source.charCodeAt( order++ ))) return securityCode;
+                        increaseChar = tableFetch[increaseChar];
+                    } while (order < sourceLength && -1 === increaseChar);
+                    if (-1 === increaseChar) break;
+
+                    securityCode += String.fromCharCode( (3 & nextChar) << 6 | increaseChar );
+                }
+                return securityCode
+            })( lastDataCopy );
+            //CryptoJS.enc.Utf8.stringify( CryptoJS.enc.Base64.parse( dataCopy ) );
+            //根据加密轮盘找到对饮解密算法：至少四种算法，其中一种是Base64；
+            //</editor-fold>
+
+            //<editor-fold desc="5.拼接，返回结果">
+            aResultObj.data.encrypt_table.forEach( functionChar => {
+                if ("q" === functionChar || "k" === functionChar) {//对应不同的加密算法
+                    const password = aResultObj.data.key_table.pop();
+                    // document.write( `password:${password}<br />` );//解密 拼接 不懂解密后的字符串
+                    aResultObj.data.info = functionsMap[functionChar]( aResultObj.data.info, password );
+                } else {
+                    aResultObj.data.info = functionsMap[functionChar]( aResultObj.data.info );
+                }
+            } );
+            // document.write( `DataInfo:${aResultObj.data.info}<br />` );
+
+            if (isReturnArray) return aResultObj.data.info;
+
+            let gotUtf8CharString = "";
+            aResultObj.data.info.forEach( char => gotUtf8CharString += String.fromCharCode( char ) );
+            return gotUtf8CharString;
+            //</editor-fold>
         }
 
+        function base64encode(str) {
+            const base64EncodeChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+            let out = "", i = 0, len = str.length;
+            let c1, c2, c3;
+
+            while (i < len) {
+                c1 = str.charCodeAt( i++ ) & 0xff;
+                if (i === len) {
+                    out += base64EncodeChars.charAt( c1 >> 2 );
+                    out += base64EncodeChars.charAt( (c1 & 0x3) << 4 );
+                    out += "==";
+                    break;
+                }
+                c2 = str.charCodeAt( i++ );
+                if (i === len) {
+                    out += base64EncodeChars.charAt( c1 >> 2 );
+                    out += base64EncodeChars.charAt( ((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4) );
+                    out += base64EncodeChars.charAt( (c2 & 0xF) << 2 );
+                    out += "=";
+                    break;
+                }
+                c3 = str.charCodeAt( i++ );
+                out += base64EncodeChars.charAt( c1 >> 2 );
+                out += base64EncodeChars.charAt( ((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4) );
+                out += base64EncodeChars.charAt( ((c2 & 0xF) << 2) | ((c3 & 0xC0) >> 6) );
+                out += base64EncodeChars.charAt( c3 & 0x3F );
+            }
+            return out;
+        }
 
         //</editor-fold>
 
         //<editor-fold desc="4.UtilitiesFunction">
+
+        //将下载链接发送到 M3u8 下载
+        function sendDownloadTextToM3u8(m3u8FileName) {//"D:\HKPath\HK\HkDownloads\k0.m3u8";
+            // let downLoadFileDirFullPath = "D:\\HKPath\\HK\\HkDownloads";//file:///F:/@Installed/HkTools/M3U81.4.2/k0.m3u8
+            let fileFullPath = downLoadFileDirFullPath.replace( /\\/g, "/" ).replace( /\/$/g, "" ).trim();
+            fileFullPath += `/${m3u8FileName}`;//file:///D:/HKPath/HK/HkDesktop/1.html
+            document.getElementById( "ImoocADownTextArea" ).append( `${m3u8FileName.replace( /\.m3u8$/ig, "" )},file:///${fileFullPath}\n` );
+        }
+
         function exportRaw(toDownloadedFileName, content) {//调用文件下载
             toDownloadedFileName = toDownloadedFileName.replace( windowsNameForbidReg, "" ).trim();
             let data = new Blob( [content], {type: "text/plain;charset=UTF-8"} );
@@ -457,9 +629,38 @@ GM_addStyle( `
             let anchor = document.createElement( "a" );
             anchor.href = downloadUrl;
             anchor.download = toDownloadedFileName;
-            myLog( toDownloadedFileName );
+            // myLog( "文件已下载",toDownloadedFileName );
             anchor.click();
             window.URL.revokeObjectURL( downloadUrl );
+        }
+
+        /*
+             * @description    根据某个字段实现对json数组的排序
+             * @param   array  要排序的json数组对象
+             * @param   field  排序字段（此参数必须为字符串）
+             * @param   reverse 是否倒序（默认为false）
+             * @return  array  返回排序后的json数组
+            */
+        function jsonSort(array, field, reverse) {
+            //数组长度小于2 或 没有指定排序字段 或 不是json格式数据
+            if (array.length < 2 || !field || typeof array[0] !== "object") return array;
+            //数字类型排序
+            if (typeof array[0][field] === "number") {
+                array.sort( function (x, y) {
+                    return x[field] - y[field]
+                } );
+            }
+            //字符串类型排序
+            if (typeof array[0][field] === "string") {
+                array.sort( function (x, y) {
+                    return x[field].localeCompare( y[field] )
+                } );
+            }
+            //倒序
+            if (reverse) {
+                array.reverse();
+            }
+            return array;
         }
 
         function showTextArea() {
@@ -489,7 +690,7 @@ GM_addStyle( `
                     '<div>文件保存位置: <input type="text" id="ADownSavePath" value="' + downLoadFileDirFullPath + '" style="width:100%" /></div>' +
                     '<div>清晰度:' +
                     '<select id="videoQualityId">' +
-                    '<option value="1" ' + (videoQuality === 1 ? 'selected' : '') + '>1.标清</option>' +
+                    '<option value="1" ' + (videoQuality === 1 ? 'selected' : '') + '>1.普清</option>' +
                     '<option value="2" ' + (videoQuality === 2 ? 'selected' : '') + '>2.高清</option>' +
                     '<option value="3" ' + (videoQuality === 3 ? 'selected' : '') + '>3.超清</option>' +
                     '</select></div>' +
@@ -575,6 +776,4 @@ GM_addStyle( `
 
         //</editor-fold>
     }
-
-)
-();
+)();
