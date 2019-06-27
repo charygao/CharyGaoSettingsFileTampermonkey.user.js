@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name            i-mo-oc爱摸客ADown
+// @name            i-mo.oc爱摸客ADown
 // @namespace       https://www.cnblogs.com/Chary/
-// @version         2019.06.24
+// @version         2019.06.25
 // @description     add download button on i-mo-oc Html Header to download videos
 // @author          CharyGao
 // @match           https://www.imooc.com/learn/*
@@ -419,89 +419,111 @@ GM_addStyle( `
     //</editor-fold>
 
     //<editor-fold desc="3.加解密">
+    //<editor-fold desc="密盘">
+    const functionsMap = {
+        k: function o(source, password) {
+            let newSource = "", sSize = source.length, pSize = password.length;
+            if ("object" == typeof source) source.forEach( currentChar => newSource += String.fromCharCode( currentChar ) );
+            source = newSource || source;//拼接字符串
 
+            const result = new Uint8Array( sSize );
+            // document.write( `k source:${source}<br />` );
+            for (let i = 0; i < sSize; i++) result[i] = source[i].toString().charCodeAt( 0 );
+
+            for (let i = 0; i < sSize; i++) {//短路运算
+                //&& 表达式中有条件为false的表达式，返回第一个条件为false的表达式的值。没有则返回最后一个表达式的值。[找false]
+                //|| 表达式中有条件为true的表达式，返回第一个条件为true的表达式的值。没有则返回最后一个表达式的值。[找true]
+                /*                if (0 !== (mod5 = result[i] % 5) && 1 !== mod5 && i + mod5 < result.length &&
+                                  (
+                                      tempChar = result[i + 1],
+                                          index2 = i + 2,
+                                          result[i + 1] = result[i + mod5],
+                                          result[mod5 + i] = tempChar,
+                                      (i = i + mod5 + 1) - 2 > index2
+                                  )
+                              )
+                                  for (; index2 < i - 2; index2++) result[index2] = result[index2] ^ password.charCodeAt( index2 % password.length );*/
+                let mod5 = result[i] % 5;//余数0-4；
+                if (mod5 > 1 && i + mod5 < result.length) {
+                    let afterNext = i + 2;
+
+                    //<editor-fold desc="交换[i + 1]与[mod5 + i]">
+                    let tmp = result[i + 1];
+                    result[i + 1] = result[i + mod5];//移序
+                    result[mod5 + i] = tmp;
+                    //</editor-fold>
+
+                    i = i + mod5 + 1;
+                    while (afterNext < i - 2) {
+                        result[afterNext] = result[afterNext] ^ password.charCodeAt( afterNext % pSize );
+
+                        afterNext++;
+                    }
+                }
+            }
+            for (let i = 0; i < sSize; i++) result[i] = result[i] ^ password.charCodeAt( i % pSize );
+            return result;
+        },
+        q: function r(source, password) {
+            let newSource = "", sSize = source.length, pSize = password.length;
+            if ("object" == typeof source) source.forEach( currentChar => newSource += String.fromCharCode( currentChar ) );
+            source = newSource || source;//拼接字符串
+
+            let result = new Uint8Array( sSize );
+            // document.write( `q source:${source}<br />` );
+            for (let i = 0; i < sSize; i++) result[i] = source[i].toString().charCodeAt( 0 ) ^ password.charCodeAt( i % pSize );
+
+            return result;
+        },
+        h: function n(source) {
+
+            let newSource = "", sSize = source.length;
+            if ("object" == typeof source) source.forEach( currentChar => newSource += String.fromCharCode( currentChar ) );
+
+            source = newSource || source;
+            const result = new Uint8Array( sSize );
+            //document.write( `h：sourceString:${source}<br />` );
+            for (let i = 0; i < sSize; i++) result[i] = source[i].toString().charCodeAt( 0 );
+
+            for (let i = 0; i < sSize; i++) {//result.length=sSize
+                let mod3 = result[i] % 3;
+                if (0 !== mod3 && i + mod3 < sSize) {//result.length
+                    //<editor-fold desc="交换[i + 1]与[i + mod3]">
+                    let tmp = result[i + 1];
+                    result[i + 1] = result[i + mod3];
+                    result[i + mod3] = tmp;
+                    //</editor-fold>
+                    i = i + mod3 + 1;
+                }
+            }
+            return result;
+        },
+        m: function i(source) {
+            let newSource = "", sSize = source.length;
+            if ("object" == typeof source) source.forEach( currentChar => newSource += String.fromCharCode( currentChar ) );
+
+            source = newSource || source;
+            const mResult = new Uint8Array( sSize );
+            // document.write( `m：sourceString:${source}<br />` );
+            for (let i = 0; i < sSize; i++) mResult[i] = source[i].toString().charCodeAt( 0 );
+
+            let rSize = 0;
+            for (let i = 0; i < sSize; i++) {//mResult.length = sSize
+                mResult[i] % 2 && i++;//间隔1个取
+                rSize++;
+            }
+            const result = new Uint8Array( rSize );
+            for (let i = 0, j = 0; i < sSize; i++) result[j++] = mResult[i] % 2 ? mResult[i++] : mResult[i];
+            return result;
+        },
+
+    };
+
+    //</editor-fold>
     function decryptDefault(data, isReturnArray) {
 
         //<editor-fold desc="0.属性定义">
         const aResultObj = {data: {info: data}};
-        const functionsMap = {
-            q: function r(sourceCArray, password) {
-                let recodeString = "";
-                if ("object" == typeof sourceCArray) sourceCArray.forEach( currentChar => recodeString += String.fromCharCode( currentChar ) );
-                sourceCArray = recodeString || sourceCArray;//拼接字符串
-
-                let resultUint8Array = new Uint8Array( sourceCArray.length );
-                //document.write( `sourceString:${sourceCArray}<br />` );
-                for (let index = 0; index < sourceCArray.length; index++) resultUint8Array[index] = sourceCArray[index].toString().charCodeAt( 0 ) ^ password.charCodeAt( index % password.length );
-                //tableSource.split( "" ).forEach( (currentItem, index) => resultUint8Array[index] = currentItem.toString().charCodeAt( 0 ) ^ password.charCodeAt( index % password.length ) );
-
-                return resultUint8Array;
-            },
-            k: function o(sourceCArray, password) {
-                var n = 0, i = 0, o = 0, recodeString = "";
-                if ("object" == typeof sourceCArray) sourceCArray.forEach( currentChar => recodeString += String.fromCharCode( currentChar ) );
-                sourceCArray = recodeString || sourceCArray;//拼接字符串
-
-                const resultUint8Array = new Uint8Array( sourceCArray.length );
-                // document.write( `sourceString:${sourceCArray}<br />` );
-
-                // sourceCArray.split("").forEach( (currentItem, index) => resultUint8Array[index] = currentItem.toString().charCodeAt( 0 ) );
-                for (let index = 0; index < sourceCArray.length; index++) resultUint8Array[index] = sourceCArray[index].toString().charCodeAt( 0 );
-
-                for (let r = 0; r < sourceCArray.length; r++) {
-                    if (0 !== (o = resultUint8Array[r] % 5) && 1 !== o && r + o < resultUint8Array.length && (i = resultUint8Array[r + 1],
-                        n = r + 2,
-                        resultUint8Array[r + 1] = resultUint8Array[r + o],
-                        resultUint8Array[o + r] = i,
-                    (r = r + o + 1) - 2 > n))
-                        for (; n < r - 2; n++)
-                            resultUint8Array[n] = resultUint8Array[n] ^ password.charCodeAt( n % password.length );
-                }
-                for (let r = 0; r < sourceCArray.length; r++)
-                    resultUint8Array[r] = resultUint8Array[r] ^ password.charCodeAt( r % password.length );
-                return resultUint8Array;
-            },
-            h: function n(sourceCArray) {
-                let recodeString = "";
-                if ("object" == typeof sourceCArray) sourceCArray.forEach( currentChar => recodeString += String.fromCharCode( currentChar ) );
-
-                sourceCArray = recodeString || sourceCArray;
-                var resultUint8Array = new Uint8Array( sourceCArray.length );
-                // document.write( `sourceString:${sourceCArray}<br />` );
-
-                for (r = 0; r < sourceCArray.length; r++)
-                    resultUint8Array[r] = sourceCArray[r].toString().charCodeAt( 0 );
-                var i, o, r = 0;
-                for (r = 0; r < resultUint8Array.length; r++)
-                    0 !== (i = resultUint8Array[r] % 3) && r + i < resultUint8Array.length && (o = resultUint8Array[r + 1],
-                        resultUint8Array[r + 1] = resultUint8Array[r + i],
-                        resultUint8Array[r + i] = o,
-                        r = r + i + 1);
-                return resultUint8Array;
-            },
-            m: function i(sourceCArray) {
-                var recodeString = "";
-                if ("object" == typeof sourceCArray) sourceCArray.forEach( currentChar => recodeString += String.fromCharCode( currentChar ) );
-
-                sourceCArray = recodeString || sourceCArray;
-                var n = new Uint8Array( sourceCArray.length );
-                // document.write( `sourceString:${sourceCArray}<br />` );
-
-                for (r = 0; r < sourceCArray.length; r++)
-                    n[r] = sourceCArray[r].toString().charCodeAt( 0 );
-                var r = 0, i = 0, o = 0, a = 0;
-                for (r = 0; r < n.length; r++)
-                    o = n[r] % 2,
-                    o && r++,
-                        a++;
-                var resultUint8Array = new Uint8Array( a );
-                for (r = 0; r < n.length; r++)
-                    o = n[r] % 2,
-                        resultUint8Array[i++] = o ? n[r++] : n[r];
-                return resultUint8Array;
-            },
-
-        };
         let lastDataCopy = data, used4cArray = lastDataCopy.substring( lastDataCopy.length - 4 ).split( "" );//截取后4位
         // document.write( `---------org[${lastDataCopy.length}]:${lastDataCopy}<br />` );
         //</editor-fold>
