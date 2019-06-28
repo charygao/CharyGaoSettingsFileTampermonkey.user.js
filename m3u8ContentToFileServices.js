@@ -26,6 +26,7 @@ function makeDirs(dirname, callback) {
 
 function buildM3u8DownBunchFile(m3u8FileName, saveDirPath) {//"D:\HKPath\HK\HkDownloads\k0.m3u8";
     //let downLoadFileDirFullPath = "D:\\HKPath\\HK\\HkDownloads";//file:///F:/@Installed/HkTools/M3U81.4.2/k0.m3u8
+    m3u8FileName = m3u8FileName.replace( /,/g, "%2c" ).trim();//替换","
     let fileFullPath = saveDirPath.replace( /\\/g, "/" ).replace( /\/$/g, "" ).trim();
     fileFullPath += `/${m3u8FileName}`;//file:///D:/HKPath/HK/HkDesktop/1.html
     return `${m3u8FileName.replace( /\.m3u8$/ig, "" )},file:///${fileFullPath}\r\n`;
@@ -33,15 +34,15 @@ function buildM3u8DownBunchFile(m3u8FileName, saveDirPath) {//"D:\HKPath\HK\HkDo
 
 app.post( '/saveM3u8Files', function (req, res) {
     let video = req.body;
-    let checkedCourseName = video.CourseName.replace( windowsNameForbidReg, "" ).trim();
-    let saveDirFullPath = process.cwd() + "/" + checkedCourseName;
+    let checkedCourseName = video.CourseName.replace( windowsNameForbidReg, "" ).replace( /,|，/g, "" ).trim();
+    let saveDirFullPath = (process.cwd() + "/" + checkedCourseName).replace( /,/g, "%2c" ).trim();//替换","
 
     makeDirs( `./${checkedCourseName}`, error => {
         if (error) {//创建目录失败
             res.send( `创建目录失败:${error.message}` );
             throw error;
         }//创建成功！
-        let bunchFileRelativePath = `./${checkedCourseName}/${checkedCourseName}ADownBunchFile.txt`;
+        let bunchFileRelativePath = `./${checkedCourseName}/${checkedCourseName}ADownBunchFile.txt`.replace( /,/g, "%2c" ).trim();
         let responseText = buildM3u8DownBunchFile( video.DownLoadM3u8FileName, saveDirFullPath );
         fs.appendFile( bunchFileRelativePath, responseText, 'utf8', (error) => {// 保存完成后的回调函数
             if (error) {
