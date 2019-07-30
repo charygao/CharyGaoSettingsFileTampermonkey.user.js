@@ -1,21 +1,23 @@
 // ==UserScript==
-// @name            黑姆雷啊ADown
-// @name:en         XmLyADownloader
-// @namespace       https://www.cnblogs.com/chary
-// @version         0.0.1
-// @description     黑姆雷啊ADown
-// @author          CharyGao
-// @match           https://www.ximalaya.com/*/*/
-// @grant           unsafeWindow
-// @grant           GM_getValue
-// @grant           GM_setValue
-// @grant           GM_xmlhttpRequest
-// @grant           GM_openInTab
-// @grant           GM_setClipboard
-// @grant           GM_registerMenuCommand
-// @grant           GM_addStyle
-// @grant           GM_download
-// @run-at          document-end
+// @name               黑姆雷啊ADown
+// @name:en            XmLyADownloader
+// @namespace          https://www.cnblogs.com/chary
+// @version            0.0.1
+// @description        手撕MD5
+// @description:zh-cn  黑姆雷啊ADown
+// @description:en     XmLyADownloader with md5 encryption
+// @author             CharyGao
+// @match              https://www.ximalaya.com/*/*/
+// @grant              unsafeWindow
+// @grant              GM_getValue
+// @grant              GM_setValue
+// @grant              GM_xmlhttpRequest
+// @grant              GM_openInTab
+// @grant              GM_setClipboard
+// @grant              GM_registerMenuCommand
+// @grant              GM_addStyle
+// @grant              GM_download
+// @run-at             document-end
 // ==/UserScript==
 //</editor-fold>
 
