@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            KuaiKan ADown
 // @namespace       https://www.cnblogs.com/Chary/
-// @version         0.0.1
+// @version         0.0.2
 // @description     add download button on kuaikan Html Header to download videos
 // @author          CharyGao
 // @match           https://www.kuaikan1.com/*
@@ -206,7 +206,7 @@ GM_addStyle(`
                         let textHtml = response.responseText;
                         let m3u8FileLevel1Url = textHtml.match(/var purl = '(http.*?.m3u8)';/)[1];
 
-                        document.getElementById("ADownTextArea").append(`${m3u8FileNameForLog},${m3u8FileLevel1Url}\n`);
+                        document.getElementById("ADownTextArea").append(`${m3u8FileNameForLog},${m3u8FileLevel1Url}\r\n`);
                         subDownloadItem.M3u8Info = m3u8FileLevel1Url;
 
                         downloadedContents.DownLoadTotalCount--;
