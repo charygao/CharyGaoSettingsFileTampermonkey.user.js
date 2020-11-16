@@ -1,15 +1,20 @@
 // ==UserScript==
 // @name               FkGFW富国服墙
 // @namespace          https://www.cnblogs.com/chary
-// @version            0.0.1
+// @version            0.0.3
 // @author             CharyGao
 // @description        FkGFW only supports the latest chrome and Tm;啥都不服只扶墙;
 // @icon               https://img.icons8.com/ios-filled/100/000000/firewall.png
-// @include            https://io.freess.info*
+// @match              https://io.freess.info/*
 // @include            https://*.ishadowx.*
+// @include            https://www.ximalaya.com/*/*/
+// @include            https://space.bilibili.com/*/*
 // @require            https://bundle.run/jsqr@1.3.1
+// @require            https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js
 // @require            https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/core.min.js
+// @require            https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/md5.min.js
 // @require            https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/enc-base64.min.js
+// @require            https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/enc-hex.min.js
 // @run-at             document-end
 // @grant              GM_setValue
 // @grant              GM_getValue
@@ -281,7 +286,7 @@
             textContainer.id = "god_down_text_div";
             // language=HTML
             textContainer.innerHTML = `
-                <div style="white-space: nowrap; width: calc(100% - 10px); position: fixed; top: 50%;left: 0; 
+                <div style="white-space: nowrap; width: calc(100% - 10px); position: fixed; top: 50%;left: 0;
 margin: 2px; height: calc(50% - 50px); background: black; color: lawngreen; resize: none; border: 3px solid green; overflow: scroll;z-index: 99;">
                     <textarea id="god_down_textarea"
                               style=" width: 100%; height: 100%;display: none;color: green; background: black; border: red 1px dashed;"></textarea>
@@ -290,6 +295,7 @@ margin: 2px; height: calc(50% - 50px); background: black; color: lawngreen; resi
             document.body.appendChild(textContainer);
             this.textContainer = textContainer;
             this.textContainerTextarea = document.getElementById("god_down_textarea");
+            // noinspection JSUnusedGlobalSymbols
             this.textContainerLinksNode = document.getElementById("god_down_links_node");
             this.count = 0;
             textContainer.hidden = true;
@@ -456,12 +462,25 @@ margin: 2px; height: calc(50% - 50px); background: black; color: lawngreen; resi
                 subTextArea.textContainerTextarea.style.display = "block";
                 floatTaiChi.godDownSpan1.addEventListener("click", freeSsInfoGet);
             } else if (location.href.startsWith("https://my.ishadowx.biz")) {
-                floatTaiChi.godDownLabel.addEventListener("click",//https://io.freess.info/
+                floatTaiChi.godDownLabel.addEventListener("click",//https://*.ishadowx.biz
                     () => subTextArea.textContainer.hidden = !subTextArea.textContainer.hidden);
                 floatTaiChi.godDownSpan1.innerText = "获取";
                 subTextArea.textContainerTextarea.style.display = "block";
                 floatTaiChi.godDownSpan1.addEventListener("click", iShadowXGet);
-            } else myLog.log("没解析成功!");
+            } else if (location.href.startsWith("https://www.ximalaya.com")) {
+                floatTaiChi.godDownLabel.addEventListener("click",//喜马拉雅
+                    () => subTextArea.textContainer.hidden = !subTextArea.textContainer.hidden);
+                floatTaiChi.godDownSpan1.innerText = "下载";
+                floatTaiChi.godDownSpan1.addEventListener("click", xiMaLaYaDown);
+            } else if (location.href.startsWith("https://space.bilibili.com/")) {
+                floatTaiChi.godDownLabel.addEventListener("click",//bilibiliYou-get
+                    () => subTextArea.textContainer.hidden = !subTextArea.textContainer.hidden);
+                floatTaiChi.godDownSpan1.innerText = "下载";
+                floatTaiChi.godDownSpan1.addEventListener("click", bilibiliSpace);
+            } else {
+
+                myLog.log("没解析成功!");
+            }
             myLog.log("GodDown加载完成~");
         } catch (e) {
             myLog.log('err:', e);
@@ -557,6 +576,7 @@ margin: 2px; height: calc(50% - 50px); background: black; color: lawngreen; resi
 
     //</editor-fold>
 
+    //<editor-fold desc="5.https://*.ishadowx.biz">
     function iShadowXGet() {
         let v2Groups = document.querySelectorAll("div.v2 span.copybtn");
         for (const item of v2Groups) {
@@ -614,5 +634,228 @@ margin: 2px; height: calc(50% - 50px); background: black; color: lawngreen; resi
         });
 
     }
+
+    //</editor-fold>
+
+    //<editor-fold desc="6.喜马拉雅vip下载 https://www.ximalaya.com">
+
+    function xiMaLaYaDown() {
+        let trackTotalCount = document.querySelector(
+            '#anchor_sound_list > div.head._Qp > span.title.active.zH_ > span')
+            .innerText.match(/（(\d+)）/)[1];
+
+        let firstItemIdHref = document.querySelector(
+            '#anchor_sound_list > div.sound-list._Qp > ul > li:nth-child(1) > div.text._Vc > a').href;
+        let firstItemId = firstItemIdHref.substring(firstItemIdHref.lastIndexOf("/") + 1);
+
+        let albumId = document.location.pathname.match(/\/(\d+)\//)[1];
+        let albumTitle = document.querySelector(
+            '#award > main > div.album-detail > div.clearfix > div.detail.layout-main > ' +
+            'div.detail-wrapper.lO_ > div.album-info.clearfix.lO_ > div.info.lO_ > h1').innerText;
+
+        let xiMaLaYaHeader = new Headers({
+            "Accept": "*/*",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Accept-Language": "zh-CN,zh;q=0.9",
+            "Connection": "keep-alive",
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            "Cookie": document.cookie,
+            "DNT": "1",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36",
+            "xm-sign": getXmSign(),//"bed39fe2cbc2c75a75eedb07a7a853ed(14)1590308034040(54)1590308034351",
+        });
+
+        fetch("https://www.ximalaya.com/revision/play/v1/show?" +
+            `id=${firstItemId}&sort=0&size=${trackTotalCount}&ptype=1`,
+            {
+                mode: "cors",
+                method: "GET",
+                // cache: "no-cache",
+                headers: xiMaLaYaHeader,
+            }
+        ).then(trackInfoResponse => {
+            if (trackInfoResponse.ok) return trackInfoResponse.json();
+            throw `1.全量获取 error trackInfoResponse.status != 200:${trackInfoResponse}`;
+        }).catch(trackInfoResponseError => myLog.log(`1.全量获取 error:${trackInfoResponseError}`)).then(trackInfoJson => {
+            // noinspection JSUnresolvedVariable
+            trackInfoJson.data.tracksAudioPlay.forEach(audioItem => {
+                // myLog.log(audioItem);
+                // noinspection JSUnresolvedVariable
+                let trackUrlPath = audioItem.trackUrl;
+                let trackUrlId = trackUrlPath.substring(trackUrlPath.lastIndexOf("/") + 1);
+                let timeStamp = Date.now();
+                // noinspection JSUnresolvedFunction
+                GM_xmlhttpRequest(
+                    {
+                        method: "GET",
+                        headers: xiMaLaYaHeader,
+                        url: "https://mpay.ximalaya.com/mobile/track/pay/" +
+                            `${trackUrlId}/${timeStamp}?device=pc&isBackend=true&_=${timeStamp}`,
+                        cookie: document.cookie,
+                        timeout: 5000,
+                        responseType: "json",
+                        onload: (trackPayItemResponseBody) => {
+                            if (trackPayItemResponseBody.status !== 200) {
+                                throw `2.单个曲目获取Key error trackPayItemResponse.status != 200:${trackPayItemResponseBody}`;
+                            }
+                            let responseJson = trackPayItemResponseBody.response;
+                            myLog.log(responseJson);
+
+                            let title = responseJson.title;
+                            let domain = responseJson.domain;
+                            // noinspection JSUnresolvedVariable
+                            let apiVersion = responseJson.apiVersion;
+                            // noinspection JSUnresolvedVariable
+                            let fileId = responseJson.fileId.split("*");
+                            let seed = responseJson.seed;
+                            // noinspection JSUnresolvedVariable
+                            let buyKey = responseJson.buyKey;
+                            let duration = responseJson.duration;
+                            // noinspection JSUnresolvedVariable
+                            let ep = responseJson.ep;
+
+                            // group1/M06/06/45/wKgJMlkVd-ODN6yjAFxxlg-_1gk645.m4a
+//https://audiofreepay.xmcdn.com/download/1.0.0/group1/M06/06/45/wKgJMlkVd9jwkuCfADotJnbTRAs619_preview_766505.m4a?sign=e87c77169a38d3aa4171c4959519ac9a&buy_key=fe4f133ccbf4b22dfa2a1e704ccbbda8&token=2325&timestamp=1590915745&duration=470
+//https://audiopay.cos.xmcdn.com/download/1.0.0/group1/M04/06/45/wKgJMlkVd-bCoLyoAGZg6UuJLus163.m4a?sign=5e99eb12e1ec3348be7e118f2fb89b73&buy_key=617574686f72697a6564&token=1140&timestamp=1590315063&duration=828
+//https://audiopay.cos.xmcdn.com/download/1.0.0/group1/M04/06/45/wKgJMlkVd-bCoLyoAGZg6UuJLus163.m4a?sign=08d03f4d35458d61e0d94a304e98e1b8&buy_key=617574686f72697a6564&token=9562&timestamp=1590916494&duration=828
+//https://audiopay.cos.xmcdn.com/download/1.0.0/group1/M04/06/45/wKgJMlkVd-bCoLyoAGZg6UuJLus163.m4a?sign=5e99eb12e1ec3348be7e118f2fb89b73&buy_key=617574686f72697a6564&token=1140&timestamp=1590315063&duration=828
+//https://audiopay.cos.xmcdn.com/download/1.0.0/group1/M04/06/45/wKgJMlkVd-bCoLyoAGZg6UuJLus163.m4a?sign=5e99eb12e1ec3348be7e118f2fb89b73&buy_key=617574686f72697a6564&token=1140&timestamp=1590315063&duration=828
+
+
+                        },
+                        onerror: (exception) => {
+                            myLog.log(`onerror:${exception}`);
+                        },
+                        ontimeout: (exception) => {
+                            myLog.log(`ontimeout:${exception}`);
+                        },
+                    });
+
+            });
+        });
+    }
+
+    /**
+     *  签名解码,协同通讯拨号器,加密算法(网页js版)
+     */
+    function getXmSign() {
+        // noinspection JSUnresolvedVariable
+        let currentTimeNum = "undefined" == typeof window ? Date.now() : window.XM_SERVER_CLOCK || 0;
+        let dateNow = Date.now();
+        let orgString = `{ximalaya-${currentTimeNum}}(${~~(Math.random() * 100)})${currentTimeNum}(${~~(Math.random() * 100)})${dateNow}`;
+        // let orgString = "{ximalaya-1564291975184}(25)1564291975184(70)1564292009912";
+
+        // noinspection JSUnresolvedVariable
+        return orgString.replace(
+            /{([\w-]+)}/, (allMatchedString, subMatchedString) => CryptoJS.MD5(subMatchedString).toString(CryptoJS.enc.HEX)
+        );
+    }
+
+    // document.write(getXmSign() + '</br>');
+    // document.write("43639784fcd7d38e6e5934830eda07b9(25)1564291975184(70)1564292009912");
+    // document.write('</br> pass? :' + (getXmSign() === "43639784fcd7d38e6e5934830eda07b9(25)1564291975184(70)1564292009912") + '</br>');
+
+    //</editor-fold>
+
+    //<editor-fold desc="7.B站个人空间 https://space.bilibili.com/">
+    let bMvYouGetBat = "";
+
+    function bilibiliSpace() {
+        let trackTotalCount = document.querySelector("#submit-video-type-filter > a.active > span").innerText;
+        let trackTotalCountInt = parseInt(trackTotalCount);
+        let pageCount = Math.ceil(trackTotalCount / 30);
+        for (let pageNum = 1; pageNum <= pageCount; pageNum++) {
+            // noinspection JSUnresolvedVariable
+            let mid = unsafeWindow.mid;
+            GM_xmlhttpRequest(
+                {
+                    mode: `cors`,
+                    method: "GET",
+                    headers: {
+                        authority: 'api.bilibili.com',
+                        accept: 'application/json, text/plain, */*',
+                        origin: document.location.origin,
+                        'sec-fetch-dest': 'empty',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                        dnt: '1',
+                        'sec-fetch-site': 'same-site',
+                        'sec-fetch-mode': 'cors',
+                        cookie: document.cookie,
+                        //"sid=7jnvcbji; DedeUserID=363794650; DedeUserID__ckMd5=286931cf65684dc8; SESSDATA=084c2f85%2C1612594093%2C4185c*81; bili_jct=4d861bb953d8269b3e5b5657ed7c5a60; CURRENT_FNVAL=80; blackside_state=1; _uuid=19DE8CC0-0025-B02E-4AD4-CCF5B97043FF60540infoc; buvid3=9ABEA76E-E761-4613-8D62-BBE89D5CDCD0143081infoc; PVID=1; rpdid=|(J|)J|uY|YJ0J'uY|uYlJm)J; bfe_id=1e33d9ad1cb29251013800c68af42315"
+                    },
+                    url: `https://api.bilibili.com/x/space/arc/search?mid=${mid.toString()}&ps=30&tid=0&pn=${pageNum.toString()}&keyword=&order=pubdate&jsonp=jsonp`,
+                    timeout: 5000,
+
+                    // responseType: "string",//one of arraybuffer, blob, json
+                    onload: (bilibiliInfoGetResponse) => {
+                        if (bilibiliInfoGetResponse.status !== 200) {
+                            throw `1.页面获取 error htmlResponse.status != 200:${bilibiliInfoGetResponse}-pageNum${pageNum}`;
+                        }
+
+                        // noinspection JSUnresolvedVariable
+                        let trackInfoJson = JSON.parse(bilibiliInfoGetResponse.response);
+                        if (trackInfoJson.code !== 0) {
+                            throw `2.页面获取 error trackInfoJson.code !== 0:${bilibiliInfoGetResponse}-pageNum${pageNum}`;
+                        }
+                        myLog.log(trackTotalCountInt, pageCount);
+
+                        // noinspection JSUnresolvedVariable
+                        trackInfoJson.data.list.vlist.forEach(audioItem => {
+                            // myLog.log(audioItem);
+                            // noinspection JSUnresolvedVariable
+                            let trackUrl = `https://www.bilibili.com/video/${audioItem.bvid}`;//https://www.bilibili.com/video/BV1ut4y197bG
+
+                            let trackTitle = audioItem.title;
+                            let youGetUrl = `start /w you-get.exe ${trackUrl}`;
+                            bMvYouGetBat += `::p${pageNum}-${trackTotalCountInt--}${trackTitle}\r\n${youGetUrl}\r\n`;
+
+                            if (trackTotalCountInt <= 0) {
+                                exportRaw("bSpaceYouGet.bat", bMvYouGetBat);
+                            }
+
+                        });
+
+                    },
+                    onerror: (exception) => {
+                        myLog.log(`onerror:${exception}`);
+                    },
+                    ontimeout: (exception) => {
+                        myLog.log(`ontimeout:${exception}`);
+                    },
+                }
+            );
+
+
+        }
+    }
+
+
+    //</editor-fold>
+
+
+    //<editor-fold desc="10.单一文件 下载">
+    function exportRaw(fileName, text) {//调用 单一文件 下载
+        let anchor = addDownAHrefNode(text, fileName);
+        anchor.click();
+    }
+
+    function addDownAHrefNode(text, fileName) {
+        let anchor = document.createElement("a");
+        let data = new Blob([text], {type: "text/plain;charset=UTF-8"});
+        anchor.href = window.URL.createObjectURL(data);
+        anchor.download = fileName;
+        anchor.innerText = fileName;
+        // noinspection JSUnresolvedFunction
+        //GM_openInTab(anchor.href, "setParent");
+
+        anchor.addEventListener("click", ev => myLog.log(fileName + "|下载-被点击！", JSON.stringify(ev)));
+        //anchor.click();
+        return anchor;
+    }
+
+    //</editor-fold>
 
 })();
