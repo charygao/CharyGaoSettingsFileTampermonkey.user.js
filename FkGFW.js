@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               FkGFW富国服墙
 // @namespace          https://www.cnblogs.com/chary
-// @version            0.0.3
+// @version            0.0.5
 // @author             CharyGao
 // @description        FkGFW only supports the latest chrome and Tm;啥都不服只扶墙;
 // @icon               https://img.icons8.com/ios-filled/100/000000/firewall.png
@@ -9,6 +9,9 @@
 // @include            https://*.ishadowx.*
 // @include            https://www.ximalaya.com/*/*/
 // @include            https://space.bilibili.com/*/*
+// @include            https://www.douyin.com/user/*
+// @include            https://open.163.com/newview/movie/*
+// @include            https://www.ixigua.com/home/*
 // @require            https://bundle.run/jsqr@1.3.1
 // @require            https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js
 // @require            https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/core.min.js
@@ -46,171 +49,193 @@
 
     //</editor-fold>
 
+    //<editor-fold desc="0.1.单一文件 下载@">
+    function exportRaw(fileName, text) {//调用 单一文件 下载
+        let anchor = addDownAHrefNode(text, fileName);
+        anchor.click();
+    }
+
+    function addDownAHrefNode(text, fileName) {
+        let anchor = document.createElement("a");
+        let data = new Blob([text], {type: "text/plain;charset=UTF-8"});
+        anchor.href = window.URL.createObjectURL(data);
+        anchor.download = fileName;
+        anchor.innerText = fileName;
+        // noinspection JSUnresolvedFunction
+        //GM_openInTab(anchor.href, "setParent");
+
+        anchor.addEventListener("click", ev => myLog.log(fileName + "|下载-被点击！", JSON.stringify(ev)));
+        //anchor.click();
+        return anchor;
+    }
+
+    //</editor-fold>
+
     //<editor-fold desc="1.Ui">
     const floatTaiChi = new class {
         constructor() {
             //<editor-fold desc="setUi Class Style">
             // noinspection JSUnresolvedFunction,CssUnusedSymbol
             GM_addStyle(// language=CSS
-                    `.aside-nav {
-                        position: fixed;
-                        top: 50px;
-                        left: 50px;
-                        z-index: 9999999 !important;
-                        width: 260px;
-                        height: 260px;
-                        filter: url(#goo);
-                        user-select: none;
-                        opacity: .75;
+                `.aside-nav {
+                    position: fixed;
+                    top: 50px;
+                    left: 50px;
+                    z-index: 9999999 !important;
+                    width: 260px;
+                    height: 260px;
+                    filter: url(#goo);
+                    user-select: none;
+                    opacity: .75;
+                }
+
+                .bounceInUp {
+                    animation-name: bounceInUp;
+                    animation-delay: 1s;
+                }
+
+                .animated {
+                    animation-duration: 1s;
+                    animation-fill-mode: both;
+                }
+
+                .aside-nav .aside-menu {
+                    position: absolute;
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    border: red 2px double;
+                    background: #07A7E1;
+                    left: 0;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    margin: auto;
+                    text-align: center;
+                    line-height: 49px;
+                    font-size: 20px;
+                    z-index: 1;
+                    /*cursor: move;*/
+                }
+
+                .aside-nav .menu-item {
+                    position: absolute;
+                    width: 60px;
+                    height: 60px;
+                    background-color: #ff7676;
+                    left: 0;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    margin: auto;
+                    line-height: 60px;
+                    text-align: center;
+                    border-radius: 50%;
+                    text-decoration: none;
+                    color: #fff;
+                    transition: background .5s, transform .6s;
+                    font-size: 14px;
+                    box-sizing: border-box;
+                }
+
+                .aside-nav .menu-item:hover {
+                    background: #a9c734;
+
+                }
+
+                .aside-nav .menu-line {
+                    line-height: 59px;
+                }
+
+                .aside-nav:hover {
+                    opacity: 1;
+                }
+
+                .aside-nav:hover .aside-menu {
+                    animation: jello 1s;
+                }
+
+                .aside-nav:hover .menu-1 {
+                    transform: translate3d(0, -135%, 0) rotateZ(0deg);
+                }
+
+                .aside-nav:hover .menu-2 {
+                    transform: translate3d(-100%, -100%, 10px) rotateZ(-45deg);
+                }
+
+                .aside-nav:hover .menu-3 {
+                    transform: translate3d(-135%, 0, 0) rotateZ(-90deg);
+                }
+
+                .aside-nav:hover .menu-4 {
+                    transform: translate3d(-100%, 100%, 10px) rotateZ(-135deg);
+                }
+
+                .aside-nav:hover .menu-5 {
+                    transform: translate3d(0%, 135%, 0) rotateZ(180deg);
+                }
+
+                .aside-nav:hover .menu-6 {
+                    transform: translate3d(100%, 100%, 10px) rotateZ(135deg);
+                }
+
+                .aside-nav:hover .menu-7 {
+                    transform: translate3d(135%, 0, 0) rotateZ(90deg);
+                }
+
+                .aside-nav:hover .menu-8 {
+                    transform: translate3d(100%, -100%, 10px) rotateZ(45deg);
+                }
+
+                @keyframes jello {
+                    from, 11.1%, to {
+                        transform: none;
                     }
-
-                    .bounceInUp {
-                        animation-name: bounceInUp;
-                        animation-delay: 1s;
+                    22.2% {
+                        transform: skewX(-12.5deg) skewY(-12.5deg);
                     }
-
-                    .animated {
-                        animation-duration: 1s;
-                        animation-fill-mode: both;
+                    33.3% {
+                        transform: skewX(6.25deg) skewY(6.25deg);
                     }
-
-                    .aside-nav .aside-menu {
-                        position: absolute;
-                        width: 50px;
-                        height: 50px;
-                        border-radius: 50%;
-                        border: red 2px double;
-                        background: #07A7E1;
-                        left: 0;
-                        top: 0;
-                        right: 0;
-                        bottom: 0;
-                        margin: auto;
-                        text-align: center;
-                        line-height: 49px;
-                        font-size: 20px;
-                        z-index: 1;
-                        /*cursor: move;*/
+                    44.4% {
+                        transform: skewX(-3.125deg) skewY(-3.125deg);
                     }
-
-                    .aside-nav .menu-item {
-                        position: absolute;
-                        width: 60px;
-                        height: 60px;
-                        background-color: #ff7676;
-                        left: 0;
-                        top: 0;
-                        right: 0;
-                        bottom: 0;
-                        margin: auto;
-                        line-height: 60px;
-                        text-align: center;
-                        border-radius: 50%;
-                        text-decoration: none;
-                        color: #fff;
-                        transition: background .5s, transform .6s;
-                        font-size: 14px;
-                        box-sizing: border-box;
+                    55.5% {
+                        transform: skewX(1.5625deg) skewY(1.5625deg);
                     }
-
-                    .aside-nav .menu-item:hover {
-                        background: #a9c734;
-
+                    66.6% {
+                        transform: skewX(-.78125deg) skewY(-.78125deg);
                     }
-
-                    .aside-nav .menu-line {
-                        line-height: 59px;
+                    77.7% {
+                        transform: skewX(0.390625deg) skewY(0.390625deg);
                     }
+                    88.8% {
+                        transform: skewX(-.1953125deg) skewY(-.1953125deg);
+                    }
+                }
 
-                    .aside-nav:hover {
+                @keyframes bounceInUp {
+                    from, 60%, 75%, 90%, to {
+                        animation-timing-function: cubic-bezier(0.215, .61, .355, 1);
+                    }
+                    from {
+                        opacity: 0;
+                        transform: translate3d(0, 800px, 0);
+                    }
+                    60% {
                         opacity: 1;
+                        transform: translate3d(0, -20px, 0);
                     }
-
-                    .aside-nav:hover .aside-menu {
-                        animation: jello 1s;
+                    75% {
+                        transform: translate3d(0, 10px, 0);
                     }
-
-                    .aside-nav:hover .menu-1 {
-                        transform: translate3d(0, -135%, 0) rotateZ(0deg);
+                    90% {
+                        transform: translate3d(0, -5px, 0);
                     }
-
-                    .aside-nav:hover .menu-2 {
-                        transform: translate3d(-100%, -100%, 10px) rotateZ(-45deg);
+                    to {
+                        transform: translate3d(0, 0, 0);
                     }
-
-                    .aside-nav:hover .menu-3 {
-                        transform: translate3d(-135%, 0, 0) rotateZ(-90deg);
-                    }
-
-                    .aside-nav:hover .menu-4 {
-                        transform: translate3d(-100%, 100%, 10px) rotateZ(-135deg);
-                    }
-
-                    .aside-nav:hover .menu-5 {
-                        transform: translate3d(0%, 135%, 0) rotateZ(180deg);
-                    }
-
-                    .aside-nav:hover .menu-6 {
-                        transform: translate3d(100%, 100%, 10px) rotateZ(135deg);
-                    }
-
-                    .aside-nav:hover .menu-7 {
-                        transform: translate3d(135%, 0, 0) rotateZ(90deg);
-                    }
-
-                    .aside-nav:hover .menu-8 {
-                        transform: translate3d(100%, -100%, 10px) rotateZ(45deg);
-                    }
-
-                    @keyframes jello {
-                        from, 11.1%, to {
-                            transform: none;
-                        }
-                        22.2% {
-                            transform: skewX(-12.5deg) skewY(-12.5deg);
-                        }
-                        33.3% {
-                            transform: skewX(6.25deg) skewY(6.25deg);
-                        }
-                        44.4% {
-                            transform: skewX(-3.125deg) skewY(-3.125deg);
-                        }
-                        55.5% {
-                            transform: skewX(1.5625deg) skewY(1.5625deg);
-                        }
-                        66.6% {
-                            transform: skewX(-.78125deg) skewY(-.78125deg);
-                        }
-                        77.7% {
-                            transform: skewX(0.390625deg) skewY(0.390625deg);
-                        }
-                        88.8% {
-                            transform: skewX(-.1953125deg) skewY(-.1953125deg);
-                        }
-                    }
-
-                    @keyframes bounceInUp {
-                        from, 60%, 75%, 90%, to {
-                            animation-timing-function: cubic-bezier(0.215, .61, .355, 1);
-                        }
-                        from {
-                            opacity: 0;
-                            transform: translate3d(0, 800px, 0);
-                        }
-                        60% {
-                            opacity: 1;
-                            transform: translate3d(0, -20px, 0);
-                        }
-                        75% {
-                            transform: translate3d(0, 10px, 0);
-                        }
-                        90% {
-                            transform: translate3d(0, -5px, 0);
-                        }
-                        to {
-                            transform: translate3d(0, 0, 0);
-                        }
-                    }
+                }
                 `)
             ;
             //</editor-fold>
@@ -219,15 +244,15 @@
             sideGodDownTagNavDiv.className = "aside-nav bounceInUp animated";
             // language=HTML
             sideGodDownTagNavDiv.innerHTML =
-                    `<label class="aside-menu" id="god_down_label">👇</label>
-            <span class="menu-item menu-line menu-1" id="god_down_span_1">①☰乾</span>
-            <span class="menu-item menu-line menu-2" id="god_down_span_2">②☱兑</span>
-            <span class="menu-item menu-line menu-3" id="god_down_span_3">③☲离</span>
-            <span class="menu-item menu-line menu-4" id="god_down_span_4">④☳震</span>
-            <span class="menu-item menu-line menu-5" id="god_down_span_5">⑤☷坤</span>
-            <span class="menu-item menu-line menu-6" id="god_down_span_6">⑥☶艮</span>
-            <span class="menu-item menu-line menu-7" id="god_down_span_7">⑦☵坎</span>
-            <span class="menu-item menu-line menu-8" id="god_down_span_8">⑧☴巽</span>`;
+                `<label class="aside-menu" id="god_down_label">👇</label>
+                <span class="menu-item menu-line menu-1" id="god_down_span_1">①☰乾</span>
+                <span class="menu-item menu-line menu-2" id="god_down_span_2">②☱兑</span>
+                <span class="menu-item menu-line menu-3" id="god_down_span_3">③☲离</span>
+                <span class="menu-item menu-line menu-4" id="god_down_span_4">④☳震</span>
+                <span class="menu-item menu-line menu-5" id="god_down_span_5">⑤☷坤</span>
+                <span class="menu-item menu-line menu-6" id="god_down_span_6">⑥☶艮</span>
+                <span class="menu-item menu-line menu-7" id="god_down_span_7">⑦☵坎</span>
+                <span class="menu-item menu-line menu-8" id="god_down_span_8">⑧☴巽</span>`;
             document.body.append(sideGodDownTagNavDiv);
 
             let drag = {
@@ -307,75 +332,75 @@ margin: 2px; height: calc(50% - 50px); background: black; color: lawngreen; resi
             //<editor-fold desc="setUi Class Style - https://animista.net/">
             // noinspection JSUnresolvedFunction,CssUnusedSymbol
             GM_addStyle(// language=CSS
-                    `
+                `
 
-                        div#god_down_show_tips {
-                            top: 20px;
-                            left: 20px;
-                            position: fixed;
-                            padding: 3px 5px;
-                            background: powderblue;
-                            border: red 3px groove;
-                            box-shadow: 0 0 10px 10px brown;
-                            border-radius: 10px;
+                    div#god_down_show_tips {
+                        top: 20px;
+                        left: 20px;
+                        position: fixed;
+                        padding: 3px 5px;
+                        background: powderblue;
+                        border: red 3px groove;
+                        box-shadow: 0 0 10px 10px brown;
+                        border-radius: 10px;
+                        opacity: 0;
+                        font-size: 12px;
+                        margin: 0;
+                        text-align: center;
+                        width: 350px;
+                        height: auto;
+                        color: darkblue;
+                        z-index: 9999;
+                    }
+
+                    .slide-in-and-out-blurred-top {
+
+                        animation-name: slide-in-blurred-top, slide-out-blurred-top;
+                        animation-duration: 0.6s, 0.45s;
+                        animation-delay: 0s, 1.6s;
+                        animation-iteration-count: 1, 1;
+                        animation-direction: normal, normal;
+                        animation-timing-function: cubic-bezier(0.230, 1.000, 0.320, 1.000), cubic-bezier(0.755, 0.050, 0.855, 0.060);
+                        animation-fill-mode: forwards, forwards; /*both, both;*/
+                    }
+
+                    .slide-in-blurred-top {
+                        animation: slide-in-blurred-top 0.6s cubic-bezier(0.230, 1.000, 0.320, 1.000) both;
+                    }
+
+                    @keyframes slide-in-blurred-top {
+                        0% {
+                            transform: translateY(-1000px) scaleY(2.5) scaleX(0.2);
+                            transform-origin: 50% 0;
+                            filter: blur(40px);
                             opacity: 0;
-                            font-size: 12px;
-                            margin: 0;
-                            text-align: center;
-                            width: 350px;
-                            height: auto;
-                            color: darkblue;
-                            z-index: 9999;
                         }
-
-                        .slide-in-and-out-blurred-top {
-
-                            animation-name: slide-in-blurred-top, slide-out-blurred-top;
-                            animation-duration: 0.6s, 0.45s;
-                            animation-delay: 0s, 1.6s;
-                            animation-iteration-count: 1, 1;
-                            animation-direction: normal, normal;
-                            animation-timing-function: cubic-bezier(0.230, 1.000, 0.320, 1.000), cubic-bezier(0.755, 0.050, 0.855, 0.060);
-                            animation-fill-mode: forwards, forwards; /*both, both;*/
+                        100% {
+                            transform: translateY(0) scaleY(1) scaleX(1);
+                            transform-origin: 50% 50%;
+                            filter: blur(0);
+                            opacity: 1;
                         }
+                    }
 
-                        .slide-in-blurred-top {
-                            animation: slide-in-blurred-top 0.6s cubic-bezier(0.230, 1.000, 0.320, 1.000) both;
-                        }
+                    .slide-out-blurred-top {
+                        animation: slide-out-blurred-top 0.45s cubic-bezier(0.755, 0.050, 0.855, 0.060) both;
+                    }
 
-                        @keyframes slide-in-blurred-top {
-                            0% {
-                                transform: translateY(-1000px) scaleY(2.5) scaleX(0.2);
-                                transform-origin: 50% 0;
-                                filter: blur(40px);
-                                opacity: 0;
-                            }
-                            100% {
-                                transform: translateY(0) scaleY(1) scaleX(1);
-                                transform-origin: 50% 50%;
-                                filter: blur(0);
-                                opacity: 1;
-                            }
+                    @keyframes slide-out-blurred-top {
+                        0% {
+                            transform: translateY(0) scaleY(1) scaleX(1);
+                            transform-origin: 50% 0;
+                            filter: blur(0);
+                            opacity: 1;
                         }
-
-                        .slide-out-blurred-top {
-                            animation: slide-out-blurred-top 0.45s cubic-bezier(0.755, 0.050, 0.855, 0.060) both;
+                        100% {
+                            transform: translateY(-1000px) scaleY(2) scaleX(0.2);
+                            transform-origin: 50% 0;
+                            filter: blur(40px);
+                            opacity: 0;
                         }
-
-                        @keyframes slide-out-blurred-top {
-                            0% {
-                                transform: translateY(0) scaleY(1) scaleX(1);
-                                transform-origin: 50% 0;
-                                filter: blur(0);
-                                opacity: 1;
-                            }
-                            100% {
-                                transform: translateY(-1000px) scaleY(2) scaleX(0.2);
-                                transform-origin: 50% 0;
-                                filter: blur(40px);
-                                opacity: 0;
-                            }
-                        }
+                    }
                 `);
             //</editor-fold>
             this.windowWidth = window.innerWidth;
@@ -415,10 +440,13 @@ margin: 2px; height: calc(50% - 50px); background: black; color: lawngreen; resi
     const aria2Caller = new class {
 
         _aria2Url = "http://127.0.0.1:6800/jsonrpc"; //Aria2 地址
-        #windowsNameForbidCharReg = /[\\?？*"“'‘<>{}\[\]【】：:、^$!~`|/]/g;
+        windowsNameForbidCharReg = /[\\?？*"“'‘<>{}\[\]【】：:、^$!~`|#/\s]/g;
         _hasOpenAriaC2Tab = false;
 
         down(downloadUrl, fileName, savePath) {
+            myLog.log(`mv url:${downloadUrl}...`)
+            savePath = savePath.replace(this.windowsNameForbidCharReg, "").trim();
+            fileName = fileName.replace(this.windowsNameForbidCharReg, "").trim();
             let jsonRpc = {
                 id: '',
                 jsonrpc: '2.0',
@@ -426,8 +454,8 @@ margin: 2px; height: calc(50% - 50px); background: black; color: lawngreen; resi
                 params: [
                     [downloadUrl],
                     {
-                        dir: savePath.replace(this.#windowsNameForbidCharReg, "_"),
-                        out: fileName.replace(this.#windowsNameForbidCharReg, "_")
+                        dir: savePath,
+                        out: fileName
                     }
                 ]
             };
@@ -438,7 +466,7 @@ margin: 2px; height: calc(50% - 50px); background: black; color: lawngreen; resi
                 data: JSON.stringify(jsonRpc),
                 onerror: response => myLog.log(`${this._aria2Url} error:${response}`),
                 onload: response => {
-                    myLog.log(`${this._aria2Url} onload:${response}`);
+                    myLog.log(`${this._aria2Url} onload:${response.statusText}`);
                     if (!this._hasOpenAriaC2Tab) {
                         // noinspection JSUnresolvedFunction
                         GM_openInTab('http://aria2c.com/', {active: true});
@@ -452,7 +480,7 @@ margin: 2px; height: calc(50% - 50px); background: black; color: lawngreen; resi
 
     //</editor-fold>
 
-    //<editor-fold desc="3.入口">
+    //<editor-fold desc="3.入口!!">
     setTimeout(function () {
         try {
             if (location.href.startsWith("https://io.freess.info")) {
@@ -477,6 +505,21 @@ margin: 2px; height: calc(50% - 50px); background: black; color: lawngreen; resi
                     () => subTextArea.textContainer.hidden = !subTextArea.textContainer.hidden);
                 floatTaiChi.godDownSpan1.innerText = "下载";
                 floatTaiChi.godDownSpan1.addEventListener("click", bilibiliSpace);
+            } else if (location.href.startsWith("https://www.douyin.com/user/")) {
+                floatTaiChi.godDownLabel.addEventListener("click",//抖音用户
+                    () => subTextArea.textContainer.hidden = !subTextArea.textContainer.hidden);
+                floatTaiChi.godDownSpan1.innerText = "下载";
+                floatTaiChi.godDownSpan1.addEventListener("click", douYinUserSpace);
+            } else if (location.href.startsWith("https://open.163.com/newview/movie/")) {
+                floatTaiChi.godDownLabel.addEventListener("click",//网易公开课
+                    () => subTextArea.textContainer.hidden = !subTextArea.textContainer.hidden);
+                floatTaiChi.godDownSpan1.innerText = "下载";
+                floatTaiChi.godDownSpan1.addEventListener("click", open163FreeSpace);
+            } else if (location.href.startsWith("https://www.ixigua.com/home/")) {
+                floatTaiChi.godDownLabel.addEventListener("click",//西瓜视频个人空间
+                    () => subTextArea.textContainer.hidden = !subTextArea.textContainer.hidden);
+                floatTaiChi.godDownSpan1.innerText = "下载";
+                floatTaiChi.godDownSpan1.addEventListener("click", iXiGuaFreeSpace);
             } else {
 
                 myLog.log("没解析成功!");
@@ -809,7 +852,7 @@ margin: 2px; height: calc(50% - 50px); background: black; color: lawngreen; resi
                             let trackUrl = `https://www.bilibili.com/video/${audioItem.bvid}`;//https://www.bilibili.com/video/BV1ut4y197bG
 
                             let trackTitle = audioItem.title;
-                            let youGetUrl = `start /w you-get.exe ${trackUrl}`;
+                            let youGetUrl = `start /w you-get.exe youtube-dl  ${trackUrl} --external-downloader aria2c --external-downloader-args "-x 16 -k 1M"`;
                             bMvYouGetBat += `::p${pageNum}-${trackTotalCountInt--}${trackTitle}\r\n${youGetUrl}\r\n`;
 
                             if (trackTotalCountInt <= 0) {
@@ -835,27 +878,189 @@ margin: 2px; height: calc(50% - 50px); background: black; color: lawngreen; resi
 
     //</editor-fold>
 
+    //<editor-fold desc="8.抖音个人空间 https://www.douyin.com/user/">
 
-    //<editor-fold desc="10.单一文件 下载">
-    function exportRaw(fileName, text) {//调用 单一文件 下载
-        let anchor = addDownAHrefNode(text, fileName);
-        anchor.click();
+    function douYinUserSpace() {
+        let i = 0;
+        let savePath = document.querySelector("#root > div > div  > div > div > div  > div  > div > h1 > span > span > span > span > span").innerText;
+        document.querySelectorAll('#root > div > div > div > div > div > div > div > ul > li > a').forEach(aHref => {
+            let fileName = ++i + "." + aHref.querySelector('div > div > img').alt + ".mp4";
+            // myLog.log(i+"fileName:"+fileName,"aHref:" + aHref.href);
+            const videoID = aHref.href.match(/video\/(\d*)/)[1];
+            let fetchUrl = "https://www.douyin.com/web/api/v2/aweme/iteminfo/?item_ids=" + videoID;
+            // myLog.log(i+"videoID"+videoID,"fetchUrl:"+fetchUrl);
+            myLog.log(i + "fileName:" + fileName, "fetchUrl:" + fetchUrl);
+
+            GM_xmlhttpRequest({
+                url: fetchUrl,
+                method: 'GET',
+                dataType: 'JSON',
+                onerror: function (response) {
+                    myLog.log(response);
+                },
+                onload: function (response) {
+                    //myLog.log(response);
+                    let json = JSON.parse(response.responseText);
+                    const videoLink = json.item_list[0].video.play_addr.url_list[0].replace("playwm", "play");
+                    // myLog.log(i+"videoLink" , videoLink);
+                    aria2Caller.down(videoLink, fileName, savePath);
+                    //sendDownloadTaskToAria2(videoLink, fileName, savePath);
+                }
+            });
+        });
     }
 
-    function addDownAHrefNode(text, fileName) {
-        let anchor = document.createElement("a");
-        let data = new Blob([text], {type: "text/plain;charset=UTF-8"});
-        anchor.href = window.URL.createObjectURL(data);
-        anchor.download = fileName;
-        anchor.innerText = fileName;
-        // noinspection JSUnresolvedFunction
-        //GM_openInTab(anchor.href, "setParent");
-
-        anchor.addEventListener("click", ev => myLog.log(fileName + "|下载-被点击！", JSON.stringify(ev)));
-        //anchor.click();
-        return anchor;
-    }
 
     //</editor-fold>
+
+    //<editor-fold desc="9.网易公开课 https://open.163.com/newview/movie/">
+
+    function open163FreeSpace() {
+        let i = 0;
+        let savePath = document.querySelector("#__layout > div > div.m-main > div.m-main__videobox > div.t-container > div.t-container__link > a.t-container__linkhover").innerText;
+        // noinspection JSUnresolvedVariable
+        unsafeWindow.__NUXT__.state.movie.moiveList.forEach(item => {
+
+            // noinspection JSUnresolvedVariable
+            let aHref = item.mp4SdUrlOrign;
+            if (aHref === "" || aHref === undefined) {
+                // noinspection JSUnresolvedVariable
+                aHref = item.mp4ShareUrl;
+            }
+            // noinspection JSUnresolvedVariable
+            let webUrl = item.webUrl;
+            let fileName = ++i + "." + item.title;
+            // noinspection JSUnresolvedVariable
+            item.subList.forEach(srt => {
+                // noinspection JSUnresolvedVariable
+                let subName = fileName + "." + srt.subName + ".srt";
+                // noinspection JSUnresolvedVariable
+                let subUrl = srt.subUrl;
+                myLog.log(i + ".get sub:" + subName, "subUrl:" + subUrl);
+                aria2Caller.down(subUrl, subName, savePath);
+            });
+            let fileFullName = fileName + ".mp4"
+            myLog.log(i + ",webUrl:" + webUrl + ".get aHref:" + aHref, ",fileFullName:" + fileFullName);
+            aria2Caller.down(aHref, fileFullName, savePath);
+        });
+
+        // document.querySelectorAll('#__layout > div > div.m-main > div.m-main__videobox > div.video-module > div > div.video-list > div.list-content > div.course-list > div > div > div.course-link > a')
+        //     .forEach(aHref => {
+        //         // let htmlContentUrl = /*window.origin + */aHref;
+        //         myLog.log(i + ".get page:", aHref/*htmlContentUrl*/);
+        //         // if (i > 1) {
+        //         //     return;//调试跳过
+        //         // }
+        //         fetch(/*htmlContentUrl*/aHref.toString(), {
+        //             "method": "GET",
+        //         }).then(response => {
+        //             if (response.status >= 200 && response.status < 300) {
+        //                 return response.text()
+        //             }
+        //             throw `${aHref} get err!`;
+        //         }).then(html => {
+        //             let videoLink = "https" + unescape(html.match(/mp4SdUrlOrign:"http(:.*?)\.mp4"/)[1].replace(/\\/g, "%")) + ".mp4";
+        //             //let fileName = ++i + "." + document.querySelector('#__layout > div > div.m-main > div.m-main__videobox > div.t-container > div.t-container__title').innerText;
+        //             let innerDiv = document.createElement("div");
+        //             innerDiv.innerHTML = html;
+        //             // noinspection JSCheckFunctionSignatures
+        //             let fileName = ++i + "." + innerDiv.querySelector('#__layout > div > div.m-main > div.m-main__videobox > div.t-container > div.t-container__title').innerText;
+        //             myLog.log(i + "fileName:" + fileName, "aHref:" + aHref.href);
+        //             aria2Caller.down(videoLink, fileName, savePath);
+        //         }).catch(err => {
+        //             myLog.log(i + `.error:`, err);
+        //         });
+        //     });
+
+    }
+
+
+    //</editor-fold>
+
+    //<editor-fold desc="10.西瓜视频 https://www.ixigua.com/home/">
+
+    function iXiGuaFreeSpace() {
+        let isDebug = false;//
+        let i = 0;
+        // let definition = "720p";//360p,480p,720p
+        // let downDefinition = 2;
+        let savePath = document.querySelector("h1 > span.user__name").innerText;
+
+        document.querySelectorAll('#App > div > main > div > div.userDetailV3__content > div > div > div.userDetailV3__main__list > div > div.HorizontalFeedCard__contentWrapper > div > a')
+            .forEach(aItem => {
+                let urlId = aItem.href.substring(aItem.href.lastIndexOf('/') + 1);
+                if (urlId === "" || urlId === undefined) {
+                    throw "urlId 为空！";
+                }
+                if (urlId.lastIndexOf('?') > 0) {
+                    //去尾
+                    urlId = urlId.substring(0, urlId.lastIndexOf('?'));
+                }
+
+                let mvPageUrl = "https://www.ixigua.com/api/public/videov2/brief/details?group_id=" + urlId;
+
+                if (isDebug) return;//调试跳过
+
+                fetch(mvPageUrl, {
+                    "method": "GET",
+                }).then(response => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json()
+                    }
+                    throw i + `${mvPageUrl} get err!`;
+                }).then(json => {
+                    let videoUrls = json['data']['videoResource']['normal']['video_list'];
+                    /*let mvCount = videoUrls.length;
+                                        for (let j = 0; j < videoUrls.length; j++) {
+                                            let thisDefinition = videoUrls[j]['definition'];
+                                            // noinspection JSUnresolvedVariable
+                                            let type = videoUrls[j].vtype;
+                                            let fileName = ++i + "." + json.data.title + "." + type;
+                                            let videoLink = atob(videoUrls[j]['main_url']);
+                                            if (mvCount > 2) {//1.360p;2.480p;3.720p;4.1080p;
+                                                downDefinition = 2;//1.360p;2.480p;3.720p;4.1080p;
+                                            } else {
+                                                downDefinition = mvCount - 1;
+                                            }
+                                            myLog.log(i + "fileName:" + fileName, `${thisDefinition}[down=${downDefinition - 1 === j}]:${videoLink}`);
+                                            if (downDefinition - 1 === j) {
+                                                aria2Caller.down(videoLink, fileName, savePath);
+                                            }
+                                        }*/
+                    let mvCount = 1;
+                    for (let p in videoUrls) {
+                        mvCount++;
+                    }
+
+                    let mvIndex = 0;
+                    for (let p in videoUrls) {//遍历json对象的每个key/value对,p为key
+                        mvIndex++;
+                        let thisDefinition = videoUrls[p]['definition'];
+                        // noinspection JSUnresolvedVariable
+                        let type = videoUrls[p].vtype;
+                        let fileName = ++i + "." + json.data.title + "." + type;
+                        let videoLink = atob(videoUrls[p]['main_url']);
+                        //let isGoingToDown = thisDefinition === definition;
+                        if (mvCount > 2) {
+                            downDefinition = 1;//0.360p;1.480p;2.720p;3.1080p;
+                        } else {
+                            downDefinition = mvCount - 1;
+                        }
+                        myLog.log(i + "fileName:" + fileName, `${thisDefinition}[down=${downDefinition === mvIndex}]:${videoLink}`);
+                        if (downDefinition === mvIndex) {
+                            aria2Caller.down(videoLink, fileName, savePath);
+                        }
+
+                    }
+                }).catch(err => {
+                    myLog.log(i + `.error:`, err);
+                });
+                // isDebug = true;
+            });
+    }
+
+
+    //</editor-fold>
+
 
 })();
